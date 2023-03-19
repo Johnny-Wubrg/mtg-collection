@@ -21,7 +21,7 @@ public class Print
   [MaxLength(8)]
   public string CollectorNumber { get; set; }
 
-  public decimal Usd { get; set; }
+  public ICollection<Price> Prices { get; set; }
   public Rarity Rarity { get; set; }
   public Language Language { get; set; }
   public ICollection<Treatment> AvailableTreatments { get; set; }

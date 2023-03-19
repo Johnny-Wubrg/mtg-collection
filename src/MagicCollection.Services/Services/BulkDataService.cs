@@ -134,7 +134,7 @@ public class BulkDataService : IBulkDataService
           ScryfallImageUri = GetImageUri(card),
           ScryfallUri = card.ScryfallUri,
           Rarity = await GetRarity(context, card.Rarity),
-          Usd = decimal.TryParse(card.Prices.Usd, out var usdValue) ? usdValue : -1,
+          Prices = await GetPrices(context, card.Prices),
           AvailableTreatments = await GetAvailableTreatments(context, card.Finishes)
         };
 
@@ -147,7 +147,6 @@ public class BulkDataService : IBulkDataService
       Console.WriteLine(ex.Message);
     }
   }
-
 
   private async Task<Language> GetLanguage(MagicCollectionContext context, string id)
   {
@@ -179,6 +178,34 @@ public class BulkDataService : IBulkDataService
     context.Rarities.Add(newRarity);
 
     return newRarity;
+  }
+
+  private async Task<ICollection<Price>> GetPrices(
+    MagicCollectionContext context,
+    Prices cardPrices
+    )
+  {
+    var prices = new List<Price>();
+
+    if (!string.IsNullOrEmpty(cardPrices.Usd)) prices.Add(new Price
+    {
+      Treatment = await GetTreatment(context, "nonfoil"),
+      Amount = decimal.Parse(cardPrices.Usd)
+    });
+
+    if (!string.IsNullOrEmpty(cardPrices.UsdFoil)) prices.Add(new Price
+    {
+      Treatment = await GetTreatment(context, "foil"),
+      Amount = decimal.Parse(cardPrices.UsdFoil)
+    });
+
+    if (!string.IsNullOrEmpty(cardPrices.UsdEtched)) prices.Add(new Price
+    {
+      Treatment = await GetTreatment(context, "etched"),
+      Amount = decimal.Parse(cardPrices.UsdEtched)
+    });
+
+    return prices;
   }
 
   private async Task<ICollection<Treatment>> GetAvailableTreatments(
