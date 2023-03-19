@@ -23,7 +23,7 @@ public class Print
 
   public ICollection<Price> Prices { get; set; }
   public Rarity Rarity { get; set; }
-  public Language Language { get; set; }
+  public Language DefaultLanguage { get; set; }
   public ICollection<Treatment> AvailableTreatments { get; set; }
 
   [Required, MaxLength(256)]

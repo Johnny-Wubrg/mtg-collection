@@ -130,7 +130,7 @@ public class BulkDataService : IBulkDataService
           EditionId = card.SetId,
           CollectorNumber = card.CollectorNumber,
           DateUpdated = DateTime.UtcNow,
-          Language = await GetLanguage(context, card.Lang),
+          DefaultLanguage = await GetLanguage(context, card.Lang),
           ScryfallImageUri = GetImageUri(card),
           ScryfallUri = card.ScryfallUri,
           Rarity = await GetRarity(context, card.Rarity),

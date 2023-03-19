@@ -10,4 +10,5 @@ public class CardEntry
   public int Quantity { get; set; }
   public Print Print { get; set; }
   public Treatment Treatment { get; set; }
+  public Language Language { get; set; }
 }
