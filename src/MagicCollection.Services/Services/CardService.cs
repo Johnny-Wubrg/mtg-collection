@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
 using MagicCollection.Services.Models;
 

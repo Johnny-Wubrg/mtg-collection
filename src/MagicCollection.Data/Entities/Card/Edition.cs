@@ -13,5 +13,5 @@ public class Edition
   [MaxLength(64)]
   public string Name { get; set; }
   
-  public DateOnly ReleaseDate { get; set; }
+  public DateOnly DateReleased { get; set; }
 }

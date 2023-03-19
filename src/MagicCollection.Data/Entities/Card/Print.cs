@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MagicCollection.Data.Entities;
 
@@ -7,7 +8,14 @@ public class Print
   [Key]
   public Guid Id { get; set; }
 
+  public Guid CardId { get; set; }
+
+  [ForeignKey(nameof(CardId))]
   public Card Card { get; set; }
+
+  public Guid EditionId { get; set; }
+  
+  [ForeignKey(nameof(EditionId))]
   public Edition Edition { get; set; }
 
   [MaxLength(8)]

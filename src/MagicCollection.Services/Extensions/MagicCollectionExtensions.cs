@@ -8,9 +8,17 @@ using ScryNet.Extensions;
 
 namespace MagicCollection.Services.Extensions;
 
+/// <summary>
+/// Extensions for MagicCollection
+/// </summary>
 public static class MagicCollectionExtensions
 {
 
+  /// <summary>
+  /// Instantiate MagicCollection services.
+  /// </summary>
+  /// <param name="services"></param>
+  /// <param name="config"></param>
   public static void AddMagicCollection(this IServiceCollection services, IConfiguration config)
   {
     AddRepositories(services, config);
@@ -26,6 +34,7 @@ public static class MagicCollectionExtensions
 
   private static void AddServices(IServiceCollection services, IConfiguration config)
   {
+    services.AddTransient<IBulkDataService, BulkDataService>();
     services.AddTransient<ICardService, CardService>();
     services.AddScryNet(config);
   }
