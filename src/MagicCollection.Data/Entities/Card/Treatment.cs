@@ -9,6 +9,4 @@ public class Treatment
 
   [MaxLength(32)]
   public string Label { get; set; }
-  
-  public ICollection<Print> Prints { get; set; }
 }

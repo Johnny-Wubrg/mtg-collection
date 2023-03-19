@@ -134,8 +134,7 @@ public class BulkDataService : IBulkDataService
           ScryfallImageUri = GetImageUri(card),
           ScryfallUri = card.ScryfallUri,
           Rarity = await GetRarity(context, card.Rarity),
-          Prices = await GetPrices(context, card.Prices),
-          AvailableTreatments = await GetAvailableTreatments(context, card.Finishes)
+          AvailableTreatments = await GetAvailableTreatments(context, card.Finishes, card.Prices)
         };
 
         await context.Prints.AddAsync(cardRecord, cancellationToken);
@@ -180,45 +179,37 @@ public class BulkDataService : IBulkDataService
     return newRarity;
   }
 
-  private async Task<ICollection<Price>> GetPrices(
-    MagicCollectionContext context,
-    Prices cardPrices
-    )
+  private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
+    MagicCollectionContext context, string[] finishes, Prices cardPrices)
   {
-    var prices = new List<Price>();
-
-    if (!string.IsNullOrEmpty(cardPrices.Usd)) prices.Add(new Price
-    {
-      Treatment = await GetTreatment(context, "nonfoil"),
-      Amount = decimal.Parse(cardPrices.Usd)
-    });
-
-    if (!string.IsNullOrEmpty(cardPrices.UsdFoil)) prices.Add(new Price
-    {
-      Treatment = await GetTreatment(context, "foil"),
-      Amount = decimal.Parse(cardPrices.UsdFoil)
-    });
-
-    if (!string.IsNullOrEmpty(cardPrices.UsdEtched)) prices.Add(new Price
-    {
-      Treatment = await GetTreatment(context, "etched"),
-      Amount = decimal.Parse(cardPrices.UsdEtched)
-    });
-
-    return prices;
-  }
-
-  private async Task<ICollection<Treatment>> GetAvailableTreatments(
-    MagicCollectionContext context, string[] finishes)
-  {
-    var treatments = new List<Treatment>();
+    var treatments = new List<PrintTreatment>();
 
     foreach (var f in finishes)
     {
-      treatments.Add(await GetTreatment(context, f));
+      var treatment = await GetTreatment(context, f);
+      treatments.Add(new PrintTreatment
+      {
+        Treatment = treatment,
+        Usd = GetTreatmentPrice(cardPrices, f)
+      });
     }
 
     return treatments;
+  }
+
+  private decimal? GetTreatmentPrice(Prices cardPrices, string treatment)
+  {
+    switch (treatment)
+    {
+      case "nonfoil":
+        return decimal.TryParse(cardPrices.Usd, out var usdResult) ? usdResult : null;
+      case "foil":
+        return decimal.TryParse(cardPrices.UsdFoil, out var usdFoilResult) ? usdFoilResult : null;
+      case "etched":
+        return decimal.TryParse(cardPrices.UsdEtched, out var usdEtchedResult) ? usdEtchedResult : null;
+      default:
+        return null;
+    }
   }
 
   private async Task<Treatment> GetTreatment(MagicCollectionContext context, string id)

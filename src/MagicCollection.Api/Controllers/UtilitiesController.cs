@@ -38,7 +38,9 @@ public class UtilitiesController : ControllerBase
     };
 
     cards = await JsonSerializer.DeserializeAsync<ScryfallCard[]>(file.OpenReadStream(), options);
-    cards = cards.Where(e => e.Legalities.Vintage != "not_legal").ToArray();
+    cards = cards
+      .Where(e => e.Legalities.Vintage != "not_legal" && e.Games.Contains("paper"))
+      .ToArray();
 
     await _bulkDataService.UploadCards(cards, cancellationToken);
 

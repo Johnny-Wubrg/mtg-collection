@@ -21,10 +21,9 @@ public class Print
   [MaxLength(8)]
   public string CollectorNumber { get; set; }
 
-  public ICollection<Price> Prices { get; set; }
   public Rarity Rarity { get; set; }
   public Language DefaultLanguage { get; set; }
-  public ICollection<Treatment> AvailableTreatments { get; set; }
+  public ICollection<PrintTreatment> AvailableTreatments { get; set; }
 
   [Required, MaxLength(256)]
   public Uri ScryfallUri { get; set; }
