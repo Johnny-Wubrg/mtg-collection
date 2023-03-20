@@ -1,23 +1,29 @@
-﻿using System.Text;
-using System.Text.Json;
-using MagicCollection.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using System.Text.Json;
+using MagicCollection.Services.BulkData;
 using Microsoft.AspNetCore.Mvc;
 using ScryNet.Models;
 
 namespace MagicTutors.Api.Controllers;
 
+/// <inheritdoc />
 [ApiController]
 [Route("[controller]")]
 public class UtilitiesController : ControllerBase
 {
   private readonly ILogger<UtilitiesController> _logger;
-  private readonly IBulkDataService _bulkDataService;
+  private readonly IImportCardsService _importCardsService;
+  private readonly IImportCollectionService _importCollectionService;
 
-  public UtilitiesController(ILogger<UtilitiesController> logger, IBulkDataService bulkDataService)
+  /// <inheritdoc />
+  public UtilitiesController(
+    ILogger<UtilitiesController> logger,
+    IImportCardsService importCardsService,
+    IImportCollectionService importCollectionService
+  )
   {
     _logger = logger;
-    _bulkDataService = bulkDataService;
+    _importCardsService = importCardsService;
+    this._importCollectionService = importCollectionService;
   }
 
   /// <summary>
@@ -26,24 +32,75 @@ public class UtilitiesController : ControllerBase
   /// <param name="file">Scryfall Export File</param>
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
-  [HttpPost("upload", Name = "UploadCards")]
+  [HttpPost("import-cards", Name = "UploadCards")]
   public async Task<ActionResult> UploadCards(IFormFile file, CancellationToken cancellationToken)
   {
-    var result = new StringBuilder();
-    var cards = new ScryfallCard[] { };
-
     var options = new JsonSerializerOptions
     {
       PropertyNameCaseInsensitive = true,
     };
 
-    cards = await JsonSerializer.DeserializeAsync<ScryfallCard[]>(file.OpenReadStream(), options);
+    var cards = await JsonSerializer.DeserializeAsync<ScryfallCard[]>(file.OpenReadStream(), options);
     cards = cards
-      .Where(e => e.Legalities.Vintage != "not_legal" && e.Games.Contains("paper"))
+      .Where(e => e.Games.Contains("paper"))
       .ToArray();
 
-    await _bulkDataService.UploadCards(cards, cancellationToken);
+    await _importCardsService.UploadCards(cards, cancellationToken);
 
     return new EmptyResult();
+  }
+
+  /// <summary>
+  /// Upload collection from a formatted CSV.
+  /// </summary>
+  /// <param name="file">Collection CSV File</param>
+  /// <param name="cancellationToken"></param>
+  [HttpPost("import-collection", Name = "UploadCollection")]
+  public async Task UploadCollection(IFormFile file, CancellationToken cancellationToken)
+  {
+    var parser = new Microsoft.VisualBasic.FileIO.TextFieldParser(file.OpenReadStream());
+    parser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
+    parser.SetDelimiters(",");
+
+    var headers = parser.ReadFields();
+    var records = new List<Dictionary<string, string>>();
+
+    while (!parser.EndOfData)
+    {
+      cancellationToken.ThrowIfCancellationRequested();
+
+      var row = parser.ReadFields();
+      var entry = new Dictionary<string, string>();
+
+      if (row == null) return;
+
+      var existing = records.FirstOrDefault(e =>
+        e["Set"] == row[2] &&
+        e["Collector Number"] == row[3] &&
+        e["Foil"] == row[4] &&
+        e["Language"] == row[5] &&
+        e["Location"] == row[6]
+      );
+
+      if (existing is not null)
+      {
+        var currentQty = int.Parse(existing["Quantity"]);
+        var adtlQty = int.Parse(row[0]);
+        existing["Quantity"] = (currentQty + adtlQty).ToString();
+
+        continue;
+      }
+
+      for (var i = 0; i < row.Length; i++)
+      {
+        if (headers != null) entry[headers[i]] = row[i];
+      }
+
+      // 3940
+
+      records.Add(entry);
+    }
+
+    await _importCollectionService.UploadCollection(records, cancellationToken);
   }
 }

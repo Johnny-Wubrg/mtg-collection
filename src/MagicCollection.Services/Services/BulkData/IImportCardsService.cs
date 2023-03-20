@@ -1,11 +1,11 @@
 using ScryNet.Models;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.BulkData;
 
 /// <summary>
-/// Service to handle bulk data loads.
+/// Service to handle bulk card data imports
 /// </summary>
-public interface IBulkDataService
+public interface IImportCardsService
 {
   /// <summary>
   /// Upload multiple card definitions from Scryfall

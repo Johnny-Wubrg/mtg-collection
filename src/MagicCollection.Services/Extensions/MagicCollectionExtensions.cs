@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MagicCollection.Data;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Services.BulkData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +35,8 @@ public static class MagicCollectionExtensions
 
   private static void AddServices(IServiceCollection services, IConfiguration config)
   {
-    services.AddTransient<IBulkDataService, BulkDataService>();
+    services.AddTransient<IImportCardsService, ImportCardsService>();
+    services.AddTransient<IImportCollectionService, ImportCollectionService>();
     services.AddTransient<ICardService, CardService>();
     services.AddScryNet(config);
   }

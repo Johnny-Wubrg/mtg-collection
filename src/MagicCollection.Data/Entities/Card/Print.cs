@@ -18,7 +18,7 @@ public class Print
   [ForeignKey(nameof(EditionId))]
   public Edition Edition { get; set; }
 
-  [MaxLength(8)]
+  [MaxLength(16)]
   public string CollectorNumber { get; set; }
 
   public Rarity Rarity { get; set; }

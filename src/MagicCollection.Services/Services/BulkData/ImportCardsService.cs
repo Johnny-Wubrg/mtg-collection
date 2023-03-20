@@ -1,26 +1,22 @@
 ﻿using MagicCollection.Data;
 using MagicCollection.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using ScryNet.Client;
 using ScryNet.Models;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.BulkData;
 
 /// <inheritdoc />
-public class BulkDataService : IBulkDataService
+public class ImportCardsService : IImportCardsService
 {
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
-  private readonly IScryfallClient _client;
 
   /// <summary>
   /// 
   /// </summary>
   /// <param name="contextOptions"></param>
-  /// <param name="client"></param>
-  public BulkDataService(DbContextOptions<MagicCollectionContext> contextOptions, IScryfallClient client)
+  public ImportCardsService(DbContextOptions<MagicCollectionContext> contextOptions)
   {
     _contextOptions = contextOptions;
-    _client = client;
   }
 
   /// <inheritdoc />
@@ -126,7 +122,7 @@ public class BulkDataService : IBulkDataService
         var cardRecord = new Print
         {
           Id = card.Id,
-          CardId = card.OracleId,
+          CardId = card.OracleId != Guid.Empty ? card.OracleId : card.CardFaces[0].OracleId,
           EditionId = card.SetId,
           CollectorNumber = card.CollectorNumber,
           DateUpdated = DateTime.UtcNow,
@@ -158,7 +154,7 @@ public class BulkDataService : IBulkDataService
       Label = id
     };
 
-    context.Languages.Add(newLang);
+    await context.Languages.AddAsync(newLang);
 
     return newLang;
   }
@@ -174,7 +170,7 @@ public class BulkDataService : IBulkDataService
       Label = id
     };
 
-    context.Rarities.Add(newRarity);
+    await context.Rarities.AddAsync(newRarity);
 
     return newRarity;
   }
@@ -223,7 +219,7 @@ public class BulkDataService : IBulkDataService
       Label = id
     };
 
-    context.Treatments.Add(newTreatment);
+    await context.Treatments.AddAsync(newTreatment);
 
     return newTreatment;
   }
