@@ -25,4 +25,7 @@ public class CardEntry
   
   [Required, ForeignKey(nameof(LanguageIdentifier))]
   public Language Language { get; set; }
+  
+  [Required]
+  public Section Section { get; set; }
 }
