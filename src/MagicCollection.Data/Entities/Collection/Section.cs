@@ -11,4 +11,6 @@ public class Section
   public string Label { get; set; }
 
   public Bin Bin { get; set; }
+  
+  public int Ordinal { get; set; }
 }

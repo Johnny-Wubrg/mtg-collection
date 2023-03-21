@@ -29,8 +29,6 @@ public class ImportCollectionService : IImportCollectionService
     cancellationToken.ThrowIfCancellationRequested();
     await using var context = new MagicCollectionContext(_contextOptions);
 
-
-
     var print = await context.Prints.FirstAsync(p =>
       p.Edition.Code.ToLower() == row["Set"].ToLower() &&
       p.CollectorNumber.ToLower() == row["Collector Number"].ToLower()
@@ -43,7 +41,8 @@ public class ImportCollectionService : IImportCollectionService
       Print = print,
       Language = await GetLanguage(context, row["Language"].ToLower()),
       Treatment = await GetTreatment(context, row["Foil"]),
-      Quantity = int.Parse(row["Quantity"])
+      Quantity = int.Parse(row["Quantity"]),
+      Section = section
     };
 
     await context.CardEntries.AddAsync(entry);

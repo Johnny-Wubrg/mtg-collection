@@ -21,8 +21,12 @@ public class Print
   [MaxLength(16)]
   public string CollectorNumber { get; set; }
 
+  [Required]
   public Rarity Rarity { get; set; }
+
+  [Required]
   public Language DefaultLanguage { get; set; }
+  
   public ICollection<PrintTreatment> AvailableTreatments { get; set; }
 
   [Required, MaxLength(256)]

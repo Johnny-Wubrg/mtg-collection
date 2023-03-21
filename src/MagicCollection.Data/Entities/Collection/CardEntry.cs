@@ -8,17 +8,21 @@ public class CardEntry
   [Key]
   public Guid Id { get; set; }
 
+  [Required]
   public int Quantity { get; set; }
   
+  [Required]
   public Print Print { get; set; }
 
+  [Required]
   public string TreatmentIdentifier { get; set; }
   
-  [ForeignKey(nameof(TreatmentIdentifier))]
+  [Required, ForeignKey(nameof(TreatmentIdentifier))]
   public Treatment Treatment { get; set; }
 
+  [Required]
   public string LanguageIdentifier { get; set; }
   
-  [ForeignKey(nameof(LanguageIdentifier))]
+  [Required, ForeignKey(nameof(LanguageIdentifier))]
   public Language Language { get; set; }
 }

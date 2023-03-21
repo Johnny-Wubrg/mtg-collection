@@ -9,4 +9,6 @@ public class Rarity
   
   [MaxLength(16)]
   public string Label { get; set; }
+
+  public int Ordinal { get; set; }
 }

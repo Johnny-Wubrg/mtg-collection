@@ -12,4 +12,6 @@ public class Bin
   public string Label { get; set; }
   
   public ICollection<Section> Sections { get; set; }
+
+  public int Ordinal { get; set; }
 }
