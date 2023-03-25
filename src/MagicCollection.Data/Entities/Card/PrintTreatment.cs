@@ -12,6 +12,8 @@ namespace MagicCollection.Data.Entities
     public string TreatmentId { get; set; }
     [ForeignKey(nameof(TreatmentId))]
     public Treatment Treatment { get; set; }
+
+    [Column(TypeName = "money")]
     public decimal? Usd { get; set; }
   }
 }
