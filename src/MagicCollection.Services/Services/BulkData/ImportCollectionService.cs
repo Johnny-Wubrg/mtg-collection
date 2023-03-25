@@ -11,6 +11,7 @@ public class ImportCollectionService : IImportCollectionService
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
   private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
   private readonly ITaxonomyRepository<Language> _languageRepository;
+  private readonly ICardEntryRepository _cardEntryRepository;
 
   /// <summary>
   /// 
@@ -18,15 +19,18 @@ public class ImportCollectionService : IImportCollectionService
   /// <param name="contextOptions"></param>
   /// <param name="treatmentRepository"></param>
   /// <param name="languageRepository"></param>
+  /// <param name="cardEntryRepository"></param>
   public ImportCollectionService(
     DbContextOptions<MagicCollectionContext> contextOptions,
     ITaxonomyRepository<Treatment> treatmentRepository,
-    ITaxonomyRepository<Language> languageRepository
+    ITaxonomyRepository<Language> languageRepository,
+    ICardEntryRepository cardEntryRepository
   )
   {
     _contextOptions = contextOptions;
     _treatmentRepository = treatmentRepository;
     _languageRepository = languageRepository;
+    _cardEntryRepository = cardEntryRepository;
   }
 
   /// <inheritdoc />
@@ -47,24 +51,17 @@ public class ImportCollectionService : IImportCollectionService
 
     var section = await GetSection(context, row["Location"], cancellationToken);
 
-    var langId = string.IsNullOrWhiteSpace(row["Language"]) ? "en" : row["Language"].ToLower(); 
-    var foilId = string.IsNullOrWhiteSpace(row["Foil"]) ? "nonfoil" : row["Foil"].ToLower(); 
+    var langId = string.IsNullOrWhiteSpace(row["Language"]) ? "en" : row["Language"].ToLower();
+    var foilId = string.IsNullOrWhiteSpace(row["Foil"]) ? "nonfoil" : row["Foil"].ToLower();
 
-    var entry = new CardEntry
-    {
-      Print = print,
-      Language = await _languageRepository.GetOrCreate(context, langId, cancellationToken),
-      Treatment = await _treatmentRepository.GetOrCreate(context, foilId, cancellationToken),
-      Quantity = int.Parse(row["Quantity"]),
-      Section = section
-    };
-
-    await context.CardEntries.AddAsync(entry, cancellationToken);
+    await _cardEntryRepository.AddOrUpdate(context, print.Id, langId, foilId, section.Id, int.Parse(row["Quantity"]),
+      cancellationToken);
     await context.SaveChangesAsync(cancellationToken);
   }
 
 
-  private async Task<Section> GetSection(MagicCollectionContext context, string label, CancellationToken cancellationToken = default)
+  private async Task<Section> GetSection(MagicCollectionContext context, string label,
+    CancellationToken cancellationToken = default)
   {
     var found = await context.Sections.FirstOrDefaultAsync(e => e.Label == label, cancellationToken: cancellationToken);
     if (found is not null) return found;

@@ -32,6 +32,7 @@ public static class MagicCollectionExtensions
   {
     services.AddTransient(typeof(ITaxonomyRepository<>), typeof(TaxonomyRepository<>));
     services.AddTransient<ICardRepository, CardRepository>();
+    services.AddTransient<ICardEntryRepository, CardEntryRepository>();
   }
 
   private static void AddServices(IServiceCollection services, IConfiguration config)
