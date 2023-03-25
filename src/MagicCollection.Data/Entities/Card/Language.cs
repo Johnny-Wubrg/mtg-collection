@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MagicCollection.Data.Entities.Interfaces;
 
 namespace MagicCollection.Data.Entities;
 
-public class Language
+public class Language : ITaxonomy
 {
   [Key, MaxLength(4)]
   public string Identifier { get; set; }

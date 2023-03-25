@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Data;
 using MagicCollection.Data.Entities;
+using MagicCollection.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using ScryNet.Models;
 
@@ -9,14 +10,28 @@ namespace MagicCollection.Services.BulkData;
 public class ImportCardsService : IImportCardsService
 {
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
+  private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
+  private readonly ITaxonomyRepository<Rarity> _rarityRepository;
+  private readonly ITaxonomyRepository<Language> _languageRepository;
 
   /// <summary>
   /// 
   /// </summary>
   /// <param name="contextOptions"></param>
-  public ImportCardsService(DbContextOptions<MagicCollectionContext> contextOptions)
+  /// <param name="treatmentRepository"></param>
+  /// <param name="rarityRepository"></param>
+  /// <param name="languageRepository"></param>
+  public ImportCardsService(
+    DbContextOptions<MagicCollectionContext> contextOptions,
+    ITaxonomyRepository<Treatment> treatmentRepository,
+    ITaxonomyRepository<Rarity> rarityRepository,
+    ITaxonomyRepository<Language> languageRepository
+    )
   {
     _contextOptions = contextOptions;
+    _treatmentRepository = treatmentRepository;
+    _rarityRepository = rarityRepository;
+    _languageRepository = languageRepository;
   }
 
   /// <inheritdoc />
@@ -126,11 +141,11 @@ public class ImportCardsService : IImportCardsService
           EditionId = card.SetId,
           CollectorNumber = card.CollectorNumber,
           DateUpdated = DateTime.UtcNow,
-          DefaultLanguage = await GetLanguage(context, card.Lang),
+          DefaultLanguage = await _languageRepository.GetOrCreate(context, card.Lang, cancellationToken),
           ScryfallImageUri = GetImageUri(card),
           ScryfallUri = card.ScryfallUri,
-          Rarity = await GetRarity(context, card.Rarity),
-          AvailableTreatments = await GetAvailableTreatments(context, card.Finishes, card.Prices)
+          Rarity = await _rarityRepository.GetOrCreate(context, card.Rarity, cancellationToken),
+          AvailableTreatments = await GetAvailableTreatments(context, card.Finishes, card.Prices, cancellationToken)
         };
 
         await context.Prints.AddAsync(cardRecord, cancellationToken);
@@ -143,46 +158,14 @@ public class ImportCardsService : IImportCardsService
     }
   }
 
-  private async Task<Language> GetLanguage(MagicCollectionContext context, string id)
-  {
-    var found = await context.Languages.FirstOrDefaultAsync(l => l.Identifier == id);
-    if (found is not null) return found;
-
-    var newLang = new Language
-    {
-      Identifier = id,
-      Label = id
-    };
-
-    await context.Languages.AddAsync(newLang);
-
-    return newLang;
-  }
-
-  private async Task<Rarity> GetRarity(MagicCollectionContext context, string id)
-  {
-    var found = await context.Rarities.FirstOrDefaultAsync(l => l.Identifier == id);
-    if (found is not null) return found;
-
-    var newRarity = new Rarity
-    {
-      Identifier = id,
-      Label = id
-    };
-
-    await context.Rarities.AddAsync(newRarity);
-
-    return newRarity;
-  }
-
   private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
-    MagicCollectionContext context, string[] finishes, Prices cardPrices)
+    MagicCollectionContext context, string[] finishes, Prices cardPrices, CancellationToken cancellationToken = default)
   {
     var treatments = new List<PrintTreatment>();
 
     foreach (var f in finishes)
     {
-      var treatment = await GetTreatment(context, f);
+      var treatment = await _treatmentRepository.GetOrCreate(context, f, cancellationToken);
       treatments.Add(new PrintTreatment
       {
         Treatment = treatment,
@@ -206,22 +189,6 @@ public class ImportCardsService : IImportCardsService
       default:
         return null;
     }
-  }
-
-  private async Task<Treatment> GetTreatment(MagicCollectionContext context, string id)
-  {
-    var found = await context.Treatments.FirstOrDefaultAsync(l => l.Identifier == id);
-    if (found is not null) return found;
-
-    var newTreatment = new Treatment
-    {
-      Identifier = id,
-      Label = id
-    };
-
-    await context.Treatments.AddAsync(newTreatment);
-
-    return newTreatment;
   }
 
   private static Uri GetImageUri(ScryfallCard card)

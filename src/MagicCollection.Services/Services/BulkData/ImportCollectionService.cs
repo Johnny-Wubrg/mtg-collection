@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Data;
 using MagicCollection.Data.Entities;
+using MagicCollection.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Services.BulkData;
@@ -8,18 +9,29 @@ namespace MagicCollection.Services.BulkData;
 public class ImportCollectionService : IImportCollectionService
 {
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
+  private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
+  private readonly ITaxonomyRepository<Language> _languageRepository;
 
   /// <summary>
   /// 
   /// </summary>
   /// <param name="contextOptions"></param>
-  public ImportCollectionService(DbContextOptions<MagicCollectionContext> contextOptions)
+  /// <param name="treatmentRepository"></param>
+  /// <param name="languageRepository"></param>
+  public ImportCollectionService(
+    DbContextOptions<MagicCollectionContext> contextOptions,
+    ITaxonomyRepository<Treatment> treatmentRepository,
+    ITaxonomyRepository<Language> languageRepository
+  )
   {
     _contextOptions = contextOptions;
+    _treatmentRepository = treatmentRepository;
+    _languageRepository = languageRepository;
   }
 
   /// <inheritdoc />
-  public async Task UploadCollection(IEnumerable<Dictionary<string, string>> entries, CancellationToken cancellationToken)
+  public async Task UploadCollection(IEnumerable<Dictionary<string, string>> entries,
+    CancellationToken cancellationToken)
   {
     foreach (var entry in entries) await CreateEntry(entry, cancellationToken);
   }
@@ -31,66 +43,34 @@ public class ImportCollectionService : IImportCollectionService
 
     var print = await context.Prints.FirstAsync(p =>
       p.Edition.Code.ToLower() == row["Set"].ToLower() &&
-      p.CollectorNumber.ToLower() == row["Collector Number"].ToLower()
-    );
+      p.CollectorNumber.ToLower() == row["Collector Number"].ToLower(), cancellationToken);
 
-    var section = await GetSection(context, row["Location"]);
+    var section = await GetSection(context, row["Location"], cancellationToken);
+
+    var langId = string.IsNullOrWhiteSpace(row["Language"]) ? "en" : row["Language"].ToLower(); 
+    var foilId = string.IsNullOrWhiteSpace(row["Foil"]) ? "nonfoil" : row["Foil"].ToLower(); 
 
     var entry = new CardEntry
     {
       Print = print,
-      Language = await GetLanguage(context, row["Language"].ToLower()),
-      Treatment = await GetTreatment(context, row["Foil"]),
+      Language = await _languageRepository.GetOrCreate(context, langId, cancellationToken),
+      Treatment = await _treatmentRepository.GetOrCreate(context, foilId, cancellationToken),
       Quantity = int.Parse(row["Quantity"]),
       Section = section
     };
 
-    await context.CardEntries.AddAsync(entry);
-    await context.SaveChangesAsync();
-  }
-
-  private async Task<Language> GetLanguage(MagicCollectionContext context, string id)
-  {
-    var identifier = string.IsNullOrEmpty(id) ? "en" : id;
-    var found = await context.Languages.FirstOrDefaultAsync(l => l.Identifier == identifier);
-    if (found is not null) return found;
-
-    var newLang = new Language
-    {
-      Identifier = id,
-      Label = id
-    };
-
-    await context.Languages.AddAsync(newLang);
-
-    return newLang;
-  }
-
-  private async Task<Treatment> GetTreatment(MagicCollectionContext context, string id)
-  {
-    var identifier = string.IsNullOrEmpty(id) ? "nonfoil" : id;
-    var found = await context.Treatments.FirstOrDefaultAsync(l => l.Identifier == identifier);
-    if (found is not null) return found;
-
-    var newTreatment = new Treatment
-    {
-      Identifier = id,
-      Label = id
-    };
-
-    await context.Treatments.AddAsync(newTreatment);
-
-    return newTreatment;
+    await context.CardEntries.AddAsync(entry, cancellationToken);
+    await context.SaveChangesAsync(cancellationToken);
   }
 
 
-  private async Task<Section> GetSection(MagicCollectionContext context, string label)
+  private async Task<Section> GetSection(MagicCollectionContext context, string label, CancellationToken cancellationToken = default)
   {
-    var found = await context.Sections.FirstOrDefaultAsync(e => e.Label == label);
+    var found = await context.Sections.FirstOrDefaultAsync(e => e.Label == label, cancellationToken: cancellationToken);
     if (found is not null) return found;
 
     var newRecord = new Section { Label = label };
-    await context.Sections.AddAsync(newRecord);
+    await context.Sections.AddAsync(newRecord, cancellationToken);
 
     return newRecord;
   }
