@@ -9,28 +9,16 @@ namespace MagicCollection.Services.BulkData;
 public class ImportCollectionService : IImportCollectionService
 {
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
-  private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
-  private readonly ITaxonomyRepository<Language> _languageRepository;
-  private readonly ICardEntryRepository _cardEntryRepository;
 
   /// <summary>
   /// 
   /// </summary>
   /// <param name="contextOptions"></param>
-  /// <param name="treatmentRepository"></param>
-  /// <param name="languageRepository"></param>
-  /// <param name="cardEntryRepository"></param>
   public ImportCollectionService(
-    DbContextOptions<MagicCollectionContext> contextOptions,
-    ITaxonomyRepository<Treatment> treatmentRepository,
-    ITaxonomyRepository<Language> languageRepository,
-    ICardEntryRepository cardEntryRepository
+    DbContextOptions<MagicCollectionContext> contextOptions
   )
   {
     _contextOptions = contextOptions;
-    _treatmentRepository = treatmentRepository;
-    _languageRepository = languageRepository;
-    _cardEntryRepository = cardEntryRepository;
   }
 
   /// <inheritdoc />
@@ -40,10 +28,15 @@ public class ImportCollectionService : IImportCollectionService
     foreach (var entry in entries) await CreateEntry(entry, cancellationToken);
   }
 
-  private async Task CreateEntry(Dictionary<string, string> row, CancellationToken cancellationToken)
+  private async Task CreateEntry(IReadOnlyDictionary<string, string> row, CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
     await using var context = new MagicCollectionContext(_contextOptions);
+    var cardEntryRepository = new CardEntryRepository(
+      context,
+      new TaxonomyRepository<Treatment>(context),
+      new TaxonomyRepository<Language>(context)
+    );
 
     var print = await context.Prints.FirstAsync(p =>
       p.Edition.Code.ToLower() == row["Set"].ToLower() &&
@@ -54,13 +47,13 @@ public class ImportCollectionService : IImportCollectionService
     var langId = string.IsNullOrWhiteSpace(row["Language"]) ? "en" : row["Language"].ToLower();
     var foilId = string.IsNullOrWhiteSpace(row["Foil"]) ? "nonfoil" : row["Foil"].ToLower();
 
-    await _cardEntryRepository.AddOrUpdate(context, print.Id, langId, foilId, section.Id, int.Parse(row["Quantity"]),
+    await cardEntryRepository.AddOrUpdate(print.Id, langId, foilId, section.Id, int.Parse(row["Quantity"]),
       cancellationToken);
     await context.SaveChangesAsync(cancellationToken);
   }
 
 
-  private async Task<Section> GetSection(MagicCollectionContext context, string label,
+  private static async Task<Section> GetSection(MagicCollectionContext context, string label,
     CancellationToken cancellationToken = default)
   {
     var found = await context.Sections.FirstOrDefaultAsync(e => e.Label == label, cancellationToken: cancellationToken);

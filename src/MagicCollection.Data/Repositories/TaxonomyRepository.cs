@@ -14,15 +14,9 @@ public class TaxonomyRepository<T> : ITaxonomyRepository<T> where T : class, ITa
 
   public async Task<T> GetOrCreate(string id, CancellationToken cancellationToken = default)
   {
-    return await GetOrCreate(_context, id, cancellationToken);
-  }
-
-  public async Task<T> GetOrCreate(MagicCollectionContext context, string id,
-    CancellationToken cancellationToken = default)
-  {
     if (string.IsNullOrWhiteSpace(id)) return null;
 
-    var found = await context.Set<T>()
+    var found = await _context.Set<T>()
       .FirstOrDefaultAsync(l => l.Identifier == id, cancellationToken: cancellationToken);
     if (found is not null) return found;
 
@@ -32,7 +26,7 @@ public class TaxonomyRepository<T> : ITaxonomyRepository<T> where T : class, ITa
       Label = id
     };
 
-    await context.Set<T>().AddAsync(newRecord, cancellationToken);
+    await _context.Set<T>().AddAsync(newRecord, cancellationToken);
 
     return newRecord;
   }

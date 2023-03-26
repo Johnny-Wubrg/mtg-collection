@@ -10,28 +10,16 @@ namespace MagicCollection.Services.BulkData;
 public class ImportCardsService : IImportCardsService
 {
   private readonly DbContextOptions<MagicCollectionContext> _contextOptions;
-  private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
-  private readonly ITaxonomyRepository<Rarity> _rarityRepository;
-  private readonly ITaxonomyRepository<Language> _languageRepository;
 
   /// <summary>
   /// 
   /// </summary>
   /// <param name="contextOptions"></param>
-  /// <param name="treatmentRepository"></param>
-  /// <param name="rarityRepository"></param>
-  /// <param name="languageRepository"></param>
   public ImportCardsService(
-    DbContextOptions<MagicCollectionContext> contextOptions,
-    ITaxonomyRepository<Treatment> treatmentRepository,
-    ITaxonomyRepository<Rarity> rarityRepository,
-    ITaxonomyRepository<Language> languageRepository
-    )
+    DbContextOptions<MagicCollectionContext> contextOptions
+  )
   {
     _contextOptions = contextOptions;
-    _treatmentRepository = treatmentRepository;
-    _rarityRepository = rarityRepository;
-    _languageRepository = languageRepository;
   }
 
   /// <inheritdoc />
@@ -53,22 +41,24 @@ public class ImportCardsService : IImportCardsService
 
     var cardUploadTasks = scryfallCards
       .DistinctBy(e => e.OracleId)
-      .Select(c => CreateCard(c, savedCardIds, cancellationToken));
+      .Where(e => !savedCardIds.Contains(e.OracleId))
+      .Select(c => CreateCard(c, cancellationToken));
 
     var editionUploadTasks = scryfallCards
       .DistinctBy(e => e.SetId)
-      .Select(c => CreateEdition(c, savedEditionIds, cancellationToken));
+      .Where(e => !savedEditionIds.Contains(e.SetId))
+      .Select(c => CreateEdition(c, cancellationToken));
 
     await Task.WhenAll(cardUploadTasks.Concat(editionUploadTasks));
 
     var printUploadTasks = scryfallCards
-      .Select(c => CreatePrint(c, savedPrintIds, cancellationToken));
+      .Where(e => !savedPrintIds.Contains(e.Id))
+      .Select(c => CreatePrint(c, cancellationToken));
 
     await Task.WhenAll(printUploadTasks);
   }
 
-  private async Task CreateCard(ScryfallCard card, Guid[] savedIds,
-    CancellationToken cancellationToken)
+  private async Task CreateCard(ScryfallCard card, CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
 
@@ -76,17 +66,14 @@ public class ImportCardsService : IImportCardsService
 
     try
     {
-      if (!savedIds.Contains(card.OracleId))
+      var cardRecord = new Card
       {
-        var cardRecord = new Card
-        {
-          Id = card.OracleId,
-          Name = card.Name
-        };
+        Id = card.OracleId,
+        Name = card.Name
+      };
 
-        await context.Cards.AddAsync(cardRecord, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-      }
+      await context.Cards.AddAsync(cardRecord, cancellationToken);
+      await context.SaveChangesAsync(cancellationToken);
     }
     catch (Exception ex)
     {
@@ -94,8 +81,7 @@ public class ImportCardsService : IImportCardsService
     }
   }
 
-  private async Task CreateEdition(ScryfallCard card, Guid[] savedIds,
-    CancellationToken cancellationToken)
+  private async Task CreateEdition(ScryfallCard card, CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
 
@@ -103,19 +89,16 @@ public class ImportCardsService : IImportCardsService
 
     try
     {
-      if (!savedIds.Contains(card.SetId))
+      var cardRecord = new Edition
       {
-        var cardRecord = new Edition
-        {
-          Id = card.SetId,
-          Code = card.Set,
-          Name = card.SetName,
-          DateReleased = DateOnly.FromDateTime(card.ReleasedAt)
-        };
+        Id = card.SetId,
+        Code = card.Set,
+        Name = card.SetName,
+        DateReleased = DateOnly.FromDateTime(card.ReleasedAt)
+      };
 
-        await context.Editions.AddAsync(cardRecord, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-      }
+      await context.Editions.AddAsync(cardRecord, cancellationToken);
+      await context.SaveChangesAsync(cancellationToken);
     }
     catch (Exception ex)
     {
@@ -123,34 +106,33 @@ public class ImportCardsService : IImportCardsService
     }
   }
 
-  private async Task CreatePrint(ScryfallCard card, Guid[] savedIds,
-    CancellationToken cancellationToken)
+  private async Task CreatePrint(ScryfallCard card, CancellationToken cancellationToken)
   {
     cancellationToken.ThrowIfCancellationRequested();
 
     await using var context = new MagicCollectionContext(_contextOptions);
+    var treatmentRepo = new TaxonomyRepository<Treatment>(context);
+    var rarityRepo = new TaxonomyRepository<Rarity>(context);
+    var languageRepo = new TaxonomyRepository<Language>(context);
 
     try
     {
-      if (!savedIds.Contains(card.Id))
+      var cardRecord = new Print
       {
-        var cardRecord = new Print
-        {
-          Id = card.Id,
-          CardId = card.OracleId != Guid.Empty ? card.OracleId : card.CardFaces[0].OracleId,
-          EditionId = card.SetId,
-          CollectorNumber = card.CollectorNumber,
-          DateUpdated = DateTime.UtcNow,
-          DefaultLanguage = await _languageRepository.GetOrCreate(context, card.Lang, cancellationToken),
-          ScryfallImageUri = GetImageUri(card),
-          ScryfallUri = card.ScryfallUri,
-          Rarity = await _rarityRepository.GetOrCreate(context, card.Rarity, cancellationToken),
-          AvailableTreatments = await GetAvailableTreatments(context, card.Finishes, card.Prices, cancellationToken)
-        };
+        Id = card.Id,
+        CardId = card.OracleId != Guid.Empty ? card.OracleId : card.CardFaces[0].OracleId,
+        EditionId = card.SetId,
+        CollectorNumber = card.CollectorNumber,
+        DateUpdated = DateTime.UtcNow,
+        DefaultLanguage = await languageRepo.GetOrCreate(card.Lang, cancellationToken),
+        ScryfallImageUri = GetImageUri(card),
+        ScryfallUri = card.ScryfallUri,
+        Rarity = await rarityRepo.GetOrCreate(card.Rarity, cancellationToken),
+        AvailableTreatments = await GetAvailableTreatments(treatmentRepo, card.Finishes, card.Prices, cancellationToken)
+      };
 
-        await context.Prints.AddAsync(cardRecord, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-      }
+      await context.Prints.AddAsync(cardRecord, cancellationToken);
+      await context.SaveChangesAsync(cancellationToken);
     }
     catch (Exception ex)
     {
@@ -159,13 +141,14 @@ public class ImportCardsService : IImportCardsService
   }
 
   private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
-    MagicCollectionContext context, string[] finishes, Prices cardPrices, CancellationToken cancellationToken = default)
+    ITaxonomyRepository<Treatment> treatmentRepository, IEnumerable<string> finishes, Prices cardPrices,
+    CancellationToken cancellationToken = default)
   {
     var treatments = new List<PrintTreatment>();
 
     foreach (var f in finishes)
     {
-      var treatment = await _treatmentRepository.GetOrCreate(context, f, cancellationToken);
+      var treatment = await treatmentRepository.GetOrCreate(f, cancellationToken);
       treatments.Add(new PrintTreatment
       {
         Treatment = treatment,
@@ -176,19 +159,15 @@ public class ImportCardsService : IImportCardsService
     return treatments;
   }
 
-  private decimal? GetTreatmentPrice(Prices cardPrices, string treatment)
+  private static decimal? GetTreatmentPrice(Prices cardPrices, string treatment)
   {
-    switch (treatment)
+    return treatment switch
     {
-      case "nonfoil":
-        return decimal.TryParse(cardPrices.Usd, out var usdResult) ? usdResult : null;
-      case "foil":
-        return decimal.TryParse(cardPrices.UsdFoil, out var usdFoilResult) ? usdFoilResult : null;
-      case "etched":
-        return decimal.TryParse(cardPrices.UsdEtched, out var usdEtchedResult) ? usdEtchedResult : null;
-      default:
-        return null;
-    }
+      "nonfoil" => decimal.TryParse(cardPrices.Usd, out var usdResult) ? usdResult : null,
+      "foil" => decimal.TryParse(cardPrices.UsdFoil, out var usdFoilResult) ? usdFoilResult : null,
+      "etched" => decimal.TryParse(cardPrices.UsdEtched, out var usdEtchedResult) ? usdEtchedResult : null,
+      _ => null
+    };
   }
 
   private static Uri GetImageUri(ScryfallCard card)

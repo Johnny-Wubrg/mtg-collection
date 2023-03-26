@@ -18,14 +18,10 @@ public class CardEntryRepository : ICardEntryRepository
     _languageRepository = languageRepository;
   }
 
-  public async Task<CardEntry> Get(Guid printId, string languageId, string treatmentId, Guid sectionId,
-    CancellationToken cancellationToken = default) =>
-    await Get(_context, printId, languageId, treatmentId, sectionId, cancellationToken);
-
-  public async Task<CardEntry> Get(MagicCollectionContext context, Guid printId, string languageId, string treatmentId,
+  public async Task<CardEntry> Get(Guid printId, string languageId, string treatmentId,
     Guid sectionId, CancellationToken cancellationToken = default)
   {
-    return await context.CardEntries.FirstOrDefaultAsync(ce =>
+    return await _context.CardEntries.FirstOrDefaultAsync(ce =>
       ce.PrintId == printId &&
       ce.LanguageIdentifier == languageId &&
       ce.TreatmentIdentifier == treatmentId &&
@@ -35,13 +31,7 @@ public class CardEntryRepository : ICardEntryRepository
   public async Task AddOrUpdate(Guid printId, string languageId, string treatmentId, Guid sectionId, int quantity,
     CancellationToken cancellationToken = default)
   {
-    await AddOrUpdate(_context, printId, languageId, treatmentId, sectionId, quantity, cancellationToken);
-  }
-
-  public async Task AddOrUpdate(MagicCollectionContext context, Guid printId, string languageId, string treatmentId,
-    Guid sectionId, int quantity, CancellationToken cancellationToken = default)
-  {
-    var found = await Get(context, printId, languageId, treatmentId, sectionId, cancellationToken);
+    var found = await Get(printId, languageId, treatmentId, sectionId, cancellationToken);
 
     if (found is not null)
     {
@@ -50,8 +40,8 @@ public class CardEntryRepository : ICardEntryRepository
     }
 
 
-    var lang = await _languageRepository.GetOrCreate(context, languageId, cancellationToken);
-    var treatment = await _treatmentRepository.GetOrCreate(context, treatmentId, cancellationToken);
+    var lang = await _languageRepository.GetOrCreate(languageId, cancellationToken);
+    var treatment = await _treatmentRepository.GetOrCreate(treatmentId, cancellationToken);
     
     var entry = new CardEntry
     {
@@ -62,6 +52,6 @@ public class CardEntryRepository : ICardEntryRepository
       SectionId = sectionId
     };
 
-    await context.CardEntries.AddAsync(entry, cancellationToken);
+    await _context.CardEntries.AddAsync(entry, cancellationToken);
   }
 }
