@@ -2,15 +2,16 @@ using System.Reflection;
 using MagicCollection.Services.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var AllowEverythingTemp = "_temporarilyAllowEverything"; // TODO
+var allowEverythingTemp = "_temporarilyAllowEverything"; // TODO
 
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(AllowEverythingTemp,
+    options.AddPolicy(allowEverythingTemp,
         policy =>
         {
             policy.WithOrigins("*");
@@ -31,12 +32,18 @@ builder.Services.AddSwaggerGen(options =>
     var currentAssembly = Assembly.GetExecutingAssembly();
     var xmlDocs = currentAssembly.GetReferencedAssemblies()
         .Union(new[] { currentAssembly.GetName() })
-        .Select(a => Path.Combine(Path.GetDirectoryName(currentAssembly.Location), $"{a.Name}.xml"))
-        .Where(f => File.Exists(f)).ToArray();
+        .Select(a => Path.Combine(Path.GetDirectoryName(currentAssembly.Location) ?? string.Empty, $"{a.Name}.xml"))
+        .Where(File.Exists).ToArray();
 
     Array.ForEach(xmlDocs, d =>
     {
         options.IncludeXmlComments(d);
+    });
+
+    options.MapType<DateOnly>(() => new OpenApiSchema
+    {
+        Type = "string",
+        Format = "date"
     });
 });
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -69,6 +76,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseCors(AllowEverythingTemp);
+app.UseCors(allowEverythingTemp);
 
 app.Run();

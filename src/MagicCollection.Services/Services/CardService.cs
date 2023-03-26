@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MagicCollection.Data.Repositories;
-using MagicCollection.Services.Models;
+using MagicCollection.Services.Models.Cards;
 
 namespace MagicCollection.Services;
 

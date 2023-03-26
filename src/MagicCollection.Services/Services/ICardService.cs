@@ -1,4 +1,4 @@
-﻿using MagicCollection.Services.Models;
+﻿using MagicCollection.Services.Models.Cards;
 
 namespace MagicCollection.Services;
 
