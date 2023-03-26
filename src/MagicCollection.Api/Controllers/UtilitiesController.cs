@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using MagicCollection.Services.BulkData;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic.FileIO;
 using ScryNet.Models;
 
 namespace MagicTutors.Api.Controllers;
@@ -58,8 +59,8 @@ public class UtilitiesController : ControllerBase
   [HttpPost("import-collection", Name = "UploadCollection")]
   public async Task UploadCollection(IFormFile file, CancellationToken cancellationToken)
   {
-    var parser = new Microsoft.VisualBasic.FileIO.TextFieldParser(file.OpenReadStream());
-    parser.TextFieldType = Microsoft.VisualBasic.FileIO.FieldType.Delimited;
+    var parser = new TextFieldParser(file.OpenReadStream());
+    parser.TextFieldType = FieldType.Delimited;
     parser.SetDelimiters(",");
 
     var headers = parser.ReadFields();
@@ -95,8 +96,6 @@ public class UtilitiesController : ControllerBase
       {
         if (headers != null) entry[headers[i]] = row[i];
       }
-
-      // 3940
 
       records.Add(entry);
     }

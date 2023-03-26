@@ -26,6 +26,12 @@ public class EditionModel
   /// <example>Ninth Edition</example>
   [Required]
   public string Name { get; set; }
+  
+  /// <summary>
+  /// A classification for the set
+  /// </summary>
+  [Required]
+  public EditionTypeModel Type { get; set; }
 
   /// <summary>
   /// The date the set was released 

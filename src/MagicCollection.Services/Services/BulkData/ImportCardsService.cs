@@ -86,6 +86,7 @@ public class ImportCardsService : IImportCardsService
     cancellationToken.ThrowIfCancellationRequested();
 
     await using var context = new MagicCollectionContext(_contextOptions);
+    var editionTypeRepo = new TaxonomyRepository<EditionType>(context);
 
     try
     {
@@ -94,6 +95,7 @@ public class ImportCardsService : IImportCardsService
         Id = card.SetId,
         Code = card.Set,
         Name = card.SetName,
+        Type = await editionTypeRepo.GetOrCreate(card.SetType, cancellationToken),
         DateReleased = DateOnly.FromDateTime(card.ReleasedAt)
       };
 
