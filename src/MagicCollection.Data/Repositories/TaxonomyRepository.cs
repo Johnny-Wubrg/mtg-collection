@@ -3,20 +3,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
-public class TaxonomyRepository<T> : ITaxonomyRepository<T> where T : class, ITaxonomy, new()
+public class TaxonomyRepository<T> : Repository<T>, ITaxonomyRepository<T> where T : class, ITaxonomy, new()
 {
-  private readonly MagicCollectionContext _context;
-
-  public TaxonomyRepository(MagicCollectionContext context)
+  public TaxonomyRepository(MagicCollectionContext context) : base(context)
   {
-    _context = context;
   }
 
   public async Task<T> GetOrCreate(string id, CancellationToken cancellationToken = default)
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
 
-    var found = await _context.Set<T>()
+    var found = await Context.Set<T>()
       .FirstOrDefaultAsync(l => l.Identifier == id, cancellationToken: cancellationToken);
     if (found is not null) return found;
 
@@ -26,7 +23,7 @@ public class TaxonomyRepository<T> : ITaxonomyRepository<T> where T : class, ITa
       Label = id
     };
 
-    await _context.Set<T>().AddAsync(newRecord, cancellationToken);
+    await Context.Set<T>().AddAsync(newRecord, cancellationToken);
 
     return newRecord;
   }

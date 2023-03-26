@@ -3,7 +3,7 @@ using MagicCollection.Data.Entities;
 
 namespace MagicCollection.Data.Repositories;
 
-public interface ICardRepository
+public interface ICardRepository : IRepository<Card>
 {
   Task<IEnumerable<Card>> GetAll(
     Func<IQueryable<Card>, IQueryable<Card>> transform = null,

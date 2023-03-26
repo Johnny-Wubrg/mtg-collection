@@ -3,17 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
-public class CardEntryRepository : ICardEntryRepository
+public class CardEntryRepository : Repository<CardEntry>, ICardEntryRepository
 {
-  private readonly MagicCollectionContext _context;
   private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
   private readonly ITaxonomyRepository<Language> _languageRepository;
 
   public CardEntryRepository(MagicCollectionContext context,
     ITaxonomyRepository<Treatment> treatmentRepository,
-    ITaxonomyRepository<Language> languageRepository)
+    ITaxonomyRepository<Language> languageRepository) : base(context)
   {
-    _context = context;
     _treatmentRepository = treatmentRepository;
     _languageRepository = languageRepository;
   }
@@ -21,7 +19,7 @@ public class CardEntryRepository : ICardEntryRepository
   public async Task<CardEntry> Get(Guid printId, string languageId, string treatmentId,
     Guid sectionId, CancellationToken cancellationToken = default)
   {
-    return await _context.CardEntries.FirstOrDefaultAsync(ce =>
+    return await Context.CardEntries.FirstOrDefaultAsync(ce =>
       ce.PrintId == printId &&
       ce.LanguageIdentifier == languageId &&
       ce.TreatmentIdentifier == treatmentId &&
@@ -52,6 +50,6 @@ public class CardEntryRepository : ICardEntryRepository
       SectionId = sectionId
     };
 
-    await _context.CardEntries.AddAsync(entry, cancellationToken);
+    await Context.CardEntries.AddAsync(entry, cancellationToken);
   }
 }

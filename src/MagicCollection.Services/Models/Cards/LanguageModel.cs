@@ -11,7 +11,7 @@ public class LanguageModel : ITaxonomyModel
   /// <summary>
   /// The identifier Scryfall uses for a language
   /// </summary>
-  /// <example>common</example>
+  /// <example>en</example>
   [Required]
   public string Identifier { get; set; }
   

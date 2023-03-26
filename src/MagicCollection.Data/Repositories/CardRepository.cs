@@ -4,14 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
-public class CardRepository : ICardRepository
+public class CardRepository : Repository<Card>, ICardRepository
 {
-  
-  private readonly MagicCollectionContext _context;
-  
-  public CardRepository(MagicCollectionContext context)
+  public CardRepository(MagicCollectionContext context) : base(context)
   {
-    _context = context;
   }
 
   public async Task<IEnumerable<Card>> GetAll(
@@ -19,26 +15,26 @@ public class CardRepository : ICardRepository
     bool tracked = false
   )
   {
-    var query = Includer(_context.Cards);
+    var query = Includer(Context.Cards);
     query = transform == null ? DefaultTransform(query) : transform(query);
     if (!tracked) query = query.AsNoTracking();
     return await query.ToListAsync();
   }
 
   public async Task<Card> Get(Guid id) =>
-    await Includer(_context.Set<Card>()).FirstOrDefaultAsync(e => e.Id == id);
+    await Includer(Context.Set<Card>()).FirstOrDefaultAsync(e => e.Id == id);
 
   public async Task<Card> GetUntracked(Guid id) =>
-    await Includer(_context.Set<Card>())
+    await Includer(Context.Set<Card>())
       .AsNoTracking()
       .FirstOrDefaultAsync(e => e.Id == id);
 
   public async Task<Card> Find(Expression<Func<Card, bool>> predicate) =>
-    await Includer(_context.Set<Card>()).FirstOrDefaultAsync(predicate);
+    await Includer(Context.Set<Card>()).FirstOrDefaultAsync(predicate);
 
   private IQueryable<Card> Includer(IQueryable<Card> query) => query;
 
   private IQueryable<Card> DefaultTransform(IQueryable<Card> query) => query.OrderBy(e => e.Name);
   
-  public async Task Commit() => await _context.SaveChangesAsync();
+  public async Task Commit() => await Context.SaveChangesAsync();
 }

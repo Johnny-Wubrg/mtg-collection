@@ -41,6 +41,7 @@ public static class MagicCollectionExtensions
     services.AddTransient<IImportCardsService, ImportCardsService>();
     services.AddTransient<IImportCollectionService, ImportCollectionService>();
     services.AddTransient<ICardService, CardService>();
+    services.AddTransient<ICardEntryService, CardEntryService>();
     services.AddScryNet(config);
   }
 
