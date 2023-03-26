@@ -42,7 +42,9 @@ public class ImportCollectionService : IImportCollectionService
       p.Edition.Code.ToLower() == row["Set"].ToLower() &&
       p.CollectorNumber.ToLower() == row["Collector Number"].ToLower(), cancellationToken);
 
-    var section = await GetSection(context, row["Location"], cancellationToken);
+    var sectionRepository = new SectionRepository(context);
+
+    var section = await sectionRepository.GetOrCreate(row["Location"], cancellationToken);
 
     var langId = string.IsNullOrWhiteSpace(row["Language"]) ? "en" : row["Language"].ToLower();
     var foilId = string.IsNullOrWhiteSpace(row["Foil"]) ? "nonfoil" : row["Foil"].ToLower();
@@ -50,18 +52,5 @@ public class ImportCollectionService : IImportCollectionService
     await cardEntryRepository.AddOrUpdate(print.Id, langId, foilId, section.Id, int.Parse(row["Quantity"]),
       cancellationToken);
     await context.SaveChangesAsync(cancellationToken);
-  }
-
-
-  private static async Task<Section> GetSection(MagicCollectionContext context, string label,
-    CancellationToken cancellationToken = default)
-  {
-    var found = await context.Sections.FirstOrDefaultAsync(e => e.Label == label, cancellationToken: cancellationToken);
-    if (found is not null) return found;
-
-    var newRecord = new Section { Label = label };
-    await context.Sections.AddAsync(newRecord, cancellationToken);
-
-    return newRecord;
   }
 }
