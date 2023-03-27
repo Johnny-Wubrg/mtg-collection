@@ -27,4 +27,7 @@ public class TaxonomyRepository<T> : Repository<T>, ITaxonomyRepository<T> where
 
     return newRecord;
   }
+
+  protected override IQueryable<T> DefaultTransform(IQueryable<T> query) =>
+    query.OrderBy(e => e.Ordinal).ThenBy(e => e.Label);
 }

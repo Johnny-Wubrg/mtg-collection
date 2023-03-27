@@ -10,4 +10,6 @@ public class Treatment : ITaxonomy
 
   [MaxLength(32)]
   public string Label { get; set; }
+
+  public int Ordinal { get; set; }
 }

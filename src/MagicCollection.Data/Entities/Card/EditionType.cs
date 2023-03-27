@@ -10,4 +10,6 @@ public class EditionType : ITaxonomy
 
   [MaxLength(24)]
   public string Label { get; set; }
+
+  public int Ordinal { get; set; }
 }
