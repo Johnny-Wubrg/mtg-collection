@@ -14,9 +14,10 @@ public class PrintModel
   public Guid Id { get; set; }
 
   /// <summary>
-  /// The related card data of the printing
+  /// The name of the card
   /// </summary>
-  public CardModel Card { get; set; }
+  /// <example>Storm Crow</example>
+  public string Name { get; set; }
 
   /// <summary>
   /// The set or edition the card was printed in
