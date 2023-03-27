@@ -35,6 +35,8 @@ public class CardService : ICardService
   /// <inheritdoc />
   public async Task<IEnumerable<CardModel>> Search(string name)
   {
+    if (string.IsNullOrEmpty(name)) return new CardModel[] { };
+    
     return _mapper.Map<IEnumerable<CardModel>>(await _cardRepo.GetAll(q =>
       q.Where(c => c.Name.ToLower().Contains(name.ToLower())).Take(10)));
   }

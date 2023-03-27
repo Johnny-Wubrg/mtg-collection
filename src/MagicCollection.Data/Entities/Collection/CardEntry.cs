@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MagicCollection.Data.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Entities;
 
 [Index(nameof(PrintId), nameof(TreatmentIdentifier), nameof(LanguageIdentifier), nameof(SectionId), IsUnique = true)]
-public class CardEntry
+public class CardEntry : IEntity
 {
   [Key]
   public Guid Id { get; set; }

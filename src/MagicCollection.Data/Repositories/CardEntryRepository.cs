@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
-public class CardEntryRepository : Repository<CardEntry>, ICardEntryRepository
+public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryRepository
 {
   private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
   private readonly ITaxonomyRepository<Language> _languageRepository;

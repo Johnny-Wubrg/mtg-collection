@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
-public class SectionRepository : Repository<Section>, ISectionRepository
+public class SectionRepository : EntityRepository<Section>, ISectionRepository
 {
   public SectionRepository(MagicCollectionContext context) : base(context)
   {

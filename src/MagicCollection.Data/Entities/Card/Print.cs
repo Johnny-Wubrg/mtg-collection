@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MagicCollection.Data.Entities.Interfaces;
 
 namespace MagicCollection.Data.Entities;
 
-public class Print
+public class Print : IEntity
 {
   [Key]
   public Guid Id { get; set; }

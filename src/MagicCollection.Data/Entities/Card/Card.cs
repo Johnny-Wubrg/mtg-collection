@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MagicCollection.Data.Entities.Interfaces;
 
 namespace MagicCollection.Data.Entities;
 
-public class Card
+public class Card : IEntity
 {
   [Key]
   public Guid Id { get; set; }

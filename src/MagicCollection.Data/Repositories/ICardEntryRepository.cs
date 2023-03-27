@@ -2,7 +2,7 @@
 
 namespace MagicCollection.Data.Repositories;
 
-public interface ICardEntryRepository : IRepository<CardEntry>
+public interface ICardEntryRepository : IEntityRepository<CardEntry>
 {
   Task<CardEntry> Get(Guid printId, string languageId, string treatmentId, Guid sectionId,
     CancellationToken cancellationToken = default);
