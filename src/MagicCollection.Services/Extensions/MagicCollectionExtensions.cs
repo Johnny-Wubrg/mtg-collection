@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using MagicCollection.Data;
+using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
 using MagicCollection.Services.BulkData;
+using MagicCollection.Services.Models.Cards;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +41,10 @@ public static class MagicCollectionExtensions
 
   private static void AddServices(IServiceCollection services, IConfiguration config)
   {
+    services.AddTransient<ITaxonomyService<TreatmentModel>, TaxonomyService<Treatment, TreatmentModel>>();
+    services.AddTransient<ITaxonomyService<RarityModel>, TaxonomyService<Rarity, RarityModel>>();
+    services.AddTransient<ITaxonomyService<LanguageModel>, TaxonomyService<Language, LanguageModel>>();
+    services.AddTransient<ITaxonomyService<EditionTypeModel>, TaxonomyService<EditionType, EditionTypeModel>>();
     services.AddTransient<IImportCardsService, ImportCardsService>();
     services.AddTransient<IImportCollectionService, ImportCollectionService>();
     services.AddTransient<ICardService, CardService>();

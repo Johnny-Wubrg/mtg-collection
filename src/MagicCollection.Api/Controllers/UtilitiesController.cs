@@ -24,7 +24,7 @@ public class UtilitiesController : ControllerBase
   {
     _logger = logger;
     _importCardsService = importCardsService;
-    this._importCollectionService = importCollectionService;
+    _importCollectionService = importCollectionService;
   }
 
   /// <summary>
@@ -41,7 +41,8 @@ public class UtilitiesController : ControllerBase
       PropertyNameCaseInsensitive = true,
     };
 
-    var cards = await JsonSerializer.DeserializeAsync<ScryfallCard[]>(file.OpenReadStream(), options);
+    var cards = await JsonSerializer.DeserializeAsync<ScryfallCard[]>(file.OpenReadStream(), options,
+      cancellationToken);
     cards = cards
       .Where(e => e.Games.Contains("paper"))
       .ToArray();
