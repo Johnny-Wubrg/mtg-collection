@@ -32,11 +32,7 @@ public class ImportCollectionService : IImportCollectionService
   {
     cancellationToken.ThrowIfCancellationRequested();
     await using var context = new MagicCollectionContext(_contextOptions);
-    var cardEntryRepository = new CardEntryRepository(
-      context,
-      new TaxonomyRepository<Treatment>(context),
-      new TaxonomyRepository<Language>(context)
-    );
+    var cardEntryRepository = new CardEntryRepository(context);
 
     var print = await context.Prints.FirstAsync(p =>
       p.Edition.Code.ToLower() == row["Set"].ToLower() &&

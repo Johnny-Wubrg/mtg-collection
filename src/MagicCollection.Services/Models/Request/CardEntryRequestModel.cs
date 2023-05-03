@@ -33,5 +33,5 @@ public record CardEntryRequestModel
   /// Id of a section to add to
   /// </summary>
   /// <example>4fc8e55a-f4e4-4b33-9843-2a6ed6327beb</example>
-  public Guid Section { get; set; }
+  public Guid? Section { get; set; }
 };

@@ -32,9 +32,8 @@ public class CardEntry : IEntity
   [Required, ForeignKey(nameof(LanguageIdentifier))]
   public Language Language { get; set; }
 
-  [Required]
-  public Guid SectionId { get; set; }
+  public Guid? SectionId { get; set; }
 
-  [Required, ForeignKey(nameof(SectionId))]
+  [ForeignKey(nameof(SectionId))]
   public Section Section { get; set; }
 }

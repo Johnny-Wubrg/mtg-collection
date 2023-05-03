@@ -5,19 +5,12 @@ namespace MagicCollection.Data.Repositories;
 
 public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryRepository
 {
-  private readonly ITaxonomyRepository<Treatment> _treatmentRepository;
-  private readonly ITaxonomyRepository<Language> _languageRepository;
-
-  public CardEntryRepository(MagicCollectionContext context,
-    ITaxonomyRepository<Treatment> treatmentRepository,
-    ITaxonomyRepository<Language> languageRepository) : base(context)
+  public CardEntryRepository(MagicCollectionContext context) : base(context)
   {
-    _treatmentRepository = treatmentRepository;
-    _languageRepository = languageRepository;
   }
 
   public async Task<CardEntry> Get(Guid printId, string languageId, string treatmentId,
-    Guid sectionId, CancellationToken cancellationToken = default)
+    Guid? sectionId, CancellationToken cancellationToken = default)
   {
     return await Context.CardEntries.FirstOrDefaultAsync(ce =>
       ce.PrintId == printId &&
@@ -26,7 +19,7 @@ public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryReposi
       ce.SectionId == sectionId, cancellationToken: cancellationToken);
   }
 
-  public async Task AddOrUpdate(Guid printId, string languageId, string treatmentId, Guid sectionId, int quantity,
+  public async Task AddOrUpdate(Guid printId, string languageId, string treatmentId, Guid? sectionId, int quantity,
     CancellationToken cancellationToken = default)
   {
     var found = await Get(printId, languageId, treatmentId, sectionId, cancellationToken);
@@ -37,15 +30,11 @@ public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryReposi
       return;
     }
 
-
-    var lang = await _languageRepository.GetOrCreate(languageId, cancellationToken);
-    var treatment = await _treatmentRepository.GetOrCreate(treatmentId, cancellationToken);
-    
     var entry = new CardEntry
     {
       PrintId = printId,
-      Language = lang,
-      Treatment = treatment,
+      LanguageIdentifier = languageId,
+      TreatmentIdentifier = treatmentId,
       Quantity = quantity,
       SectionId = sectionId
     };
