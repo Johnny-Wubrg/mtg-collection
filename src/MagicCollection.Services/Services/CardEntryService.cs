@@ -2,6 +2,7 @@
 using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
 using MagicCollection.Services.Models.Collection;
+using MagicCollection.Services.Models.Request;
 
 namespace MagicCollection.Services;
 
@@ -22,12 +23,24 @@ public class CardEntryService : ICardEntryService
     _mapper = mapper;
     _repo = repo;
   }
-  
+
   /// <inheritdoc />
-  public async Task Add(CardEntryModel model, CancellationToken cancellationToken = default)
+  public async Task Add(CardEntryRequestModel model, CancellationToken cancellationToken = default)
   {
-    await _repo.AddOrUpdate(model.Print.Id, model.Language.Identifier, model.Treatment.Identifier, model.Section.Id,
+    await _repo.AddOrUpdate(model.Print, model.Language, model.Treatment, model.Section,
       model.Quantity, cancellationToken);
+    await _repo.SaveChanges();
+  }
+
+  /// <inheritdoc />
+  public async Task AddRange(IEnumerable<CardEntryRequestModel> models, CancellationToken cancellationToken = default)
+  {
+    foreach (var model in models)
+    {
+      await _repo.AddOrUpdate(model.Print, model.Language, model.Treatment, model.Section,
+        model.Quantity, cancellationToken);
+    }
+
     await _repo.SaveChanges();
   }
 }

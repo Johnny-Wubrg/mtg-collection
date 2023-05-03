@@ -1,4 +1,5 @@
 ﻿using MagicCollection.Services.Models.Collection;
+using MagicCollection.Services.Models.Request;
 
 namespace MagicCollection.Services;
 
@@ -13,5 +14,13 @@ public interface ICardEntryService
   /// <param name="model"></param>
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
-  Task Add(CardEntryModel model, CancellationToken cancellationToken = default);
+  Task Add(CardEntryRequestModel model, CancellationToken cancellationToken = default);
+
+  /// <summary>
+  /// Bulk add cards to a collection
+  /// </summary>
+  /// <param name="models"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  Task AddRange(IEnumerable<CardEntryRequestModel> models, CancellationToken cancellationToken = default);
 }

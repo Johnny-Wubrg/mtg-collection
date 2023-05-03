@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Services;
 using MagicCollection.Services.Models.Collection;
+using MagicCollection.Services.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MagicCollection.Api.Controllers;
@@ -29,8 +30,20 @@ public class CardEntriesController : ControllerBase
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
   [HttpPost]
-  public async Task Add(CardEntryModel model, CancellationToken cancellationToken)
+  public async Task Add(CardEntryRequestModel model, CancellationToken cancellationToken)
   {
     await _cardEntryService.Add(model, cancellationToken);
+  }
+
+  /// <summary>
+  /// Bulk add cards to a collection
+  /// </summary>
+  /// <param name="models"></param>
+  /// <param name="cancellationToken"></param>
+  /// <returns></returns>
+  [HttpPost("bulk")]
+  public async Task AddMany(List<CardEntryRequestModel> models, CancellationToken cancellationToken)
+  {
+    await _cardEntryService.AddRange(models, cancellationToken);
   }
 }
