@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Services;
 using MagicCollection.Services.Models.Cards;
+using MagicCollection.Services.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MagicCollection.Api.Controllers;
@@ -26,12 +27,21 @@ public class CardsController : ControllerBase
   }
 
   /// <summary>
-  /// Search for a card be name
+  /// Search for a card by name
   /// </summary>
   /// <returns></returns>
   /// <param name="name" example="storm">Search query</param>
   [HttpGet("search")]
   public async Task<IEnumerable<CardModel>> Search(string name) => await _cardService.Search(name);
+
+
+  /// <summary>
+  /// Search for a card by name
+  /// </summary>
+  /// <returns></returns>
+  /// <param name="model">Search query</param>
+  [HttpGet("search/prints")]
+  public async Task<IEnumerable<PrintModel>> SearchPrints([FromQuery] PrintSearchModel model) => await _printService.Search(model);
 
   /// <summary>
   /// Get a card by its Scryfall oracle ID

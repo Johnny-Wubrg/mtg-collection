@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MagicCollection.Data.Repositories;
 using MagicCollection.Services.Models.Cards;
+using MagicCollection.Services.Models.Request;
 
 namespace MagicCollection.Services;
 
@@ -26,6 +27,18 @@ public class PrintService : IPrintService
   {
     _mapper = mapper;
     _repo = repo;
+  }
+
+  /// <inheritdoc />
+  public async Task<IEnumerable<PrintModel>> Search(PrintSearchModel model)
+  {
+    return _mapper.Map<IEnumerable<PrintModel>>(await _repo.GetAll(q =>
+      q.Where(c => 
+          (string.IsNullOrEmpty(model.Name) || c.Card.Name.ToLower().Contains(model.Name.ToLower())) &&
+          (string.IsNullOrEmpty(model.Set) || c.Edition.Code.ToLower().Contains(model.Set.ToLower())) &&
+          (string.IsNullOrEmpty(model.CollectorNumber) || c.CollectorNumber.ToLower() == model.CollectorNumber.ToLower())
+        )
+        .Take(10)));
   }
 
   /// <inheritdoc />

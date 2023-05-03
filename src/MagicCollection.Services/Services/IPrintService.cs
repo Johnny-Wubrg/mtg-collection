@@ -1,4 +1,5 @@
 ﻿using MagicCollection.Services.Models.Cards;
+using MagicCollection.Services.Models.Request;
 
 namespace MagicCollection.Services;
 
@@ -21,4 +22,12 @@ public interface IPrintService
   /// <param name="cn"></param>
   /// <returns></returns>
   Task<IEnumerable<PrintModel>> GetBySetCode(string setCode, string cn);
+
+
+  /// <summary>
+  /// Search for prints
+  /// </summary>
+  /// <param name="model"></param>
+  /// <returns></returns>
+  Task<IEnumerable<PrintModel>> Search(PrintSearchModel model);
 }
