@@ -55,7 +55,10 @@ public class ImportCardsService : IImportCardsService
       .Where(e => !savedPrintIds.Contains(e.Id))
       .Select(c => CreatePrint(c, cancellationToken));
 
+
     await Task.WhenAll(printUploadTasks);
+
+    await UpdatePrints(savedPrintIds, scryfallCards, cancellationToken);
   }
 
   private async Task CreateCard(ScryfallCard card, CancellationToken cancellationToken)
@@ -140,6 +143,37 @@ public class ImportCardsService : IImportCardsService
     {
       Console.WriteLine(ex.Message);
     }
+  }
+
+
+  private async Task UpdatePrints(Guid[] savedPrintIds, ScryfallCard[] scryfallCards,
+    CancellationToken cancellationToken)
+  {
+    cancellationToken.ThrowIfCancellationRequested();
+
+    await using var context = new MagicCollectionContext(_contextOptions);
+    
+    var printsToUpdate = context.Prints
+      .Include(e => e.AvailableTreatments)
+      .Where(e => savedPrintIds.Contains(e.Id));
+    
+    foreach (var print in printsToUpdate)
+    {
+      var card = scryfallCards.FirstOrDefault(e => e.Id == print.Id);
+      UpdatePrint(print, card);
+    }
+      
+    await context.SaveChangesAsync(cancellationToken);
+  }
+
+  private static void UpdatePrint(Print print, ScryfallCard card)
+  {
+    foreach (var treatment in print.AvailableTreatments)
+    {
+      treatment.Usd = GetTreatmentPrice(card.Prices, treatment.TreatmentId);
+    }
+
+    print.DateUpdated = DateTime.UtcNow;
   }
 
   private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
