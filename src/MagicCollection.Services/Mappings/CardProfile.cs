@@ -12,13 +12,16 @@ public class CardProfile : Profile
   {
     CreateMap<Card, CardModel>();
     CreateMap<Print, PrintModel>()
-      .ForMember(d => d.Name, 
-        opt => opt.MapFrom(s => s.Card.Name))
-      .ForMember(d => d.AvailableTreatments, 
-        opt => opt.MapFrom(s => s.AvailableTreatments.Select(t => t.Treatment)));
+      .ForMember(d => d.Name,
+        opt => opt.MapFrom(s => s.Card.Name));
     CreateMap<Edition, EditionModel>();
     CreateMap<EditionType, EditionTypeModel>();
     CreateMap<Treatment, TreatmentModel>();
+    CreateMap<PrintTreatment, PrintTreatmentModel>()
+      .ForMember(d => d.Identifier,
+        opt => opt.MapFrom(s => s.Treatment.Identifier))
+      .ForMember(d => d.Label,
+        opt => opt.MapFrom(s => s.Treatment.Label));
     CreateMap<Rarity, RarityModel>();
     CreateMap<Language, LanguageModel>();
   }

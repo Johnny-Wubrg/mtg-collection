@@ -5,19 +5,6 @@ using MagicCollection.Services.Models.Interfaces;
 
 namespace MagicCollection.Services;
 
-/// <summary>
-/// Service to manage taxonomy
-/// </summary>
-/// <typeparam name="TModel"></typeparam>
-public interface ITaxonomyService<TModel> where TModel : class, ITaxonomyModel, new()
-{
-  /// <summary>
-  /// Get all taxonomy.
-  /// </summary>
-  /// <returns></returns>
-  Task<IEnumerable<TModel>> GetAll();
-}
-
 /// <inheritdoc />
 public class TaxonomyService<TEntity, TModel> : ITaxonomyService<TModel> where TEntity : class, ITaxonomy, new()
   where TModel : class, ITaxonomyModel, new()

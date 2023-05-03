@@ -45,7 +45,7 @@ public class PrintModel
   /// The foiling treatments the card is available in.
   /// </summary>
   [Required]
-  public ICollection<TreatmentModel> AvailableTreatments { get; set; }
+  public ICollection<PrintTreatmentModel> AvailableTreatments { get; set; }
 
   
   /// <summary>

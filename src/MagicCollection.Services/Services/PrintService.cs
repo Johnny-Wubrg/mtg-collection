@@ -35,4 +35,14 @@ public class PrintService : IPrintService
       await _repo.GetAll(q => q.Where(p => p.CardId == cardId).OrderByDescending(p => p.Edition.DateReleased));
     return _mapper.Map<IEnumerable<PrintModel>>(prints);
   }
+
+  /// <inheritdoc />
+  public async Task<IEnumerable<PrintModel>> GetBySetCode(string setCode, string cn)
+  {
+    var prints =
+      await _repo.GetAll(q => q
+        .Where(p => p.Edition.Code.ToLower() == setCode.ToLower() && p.CollectorNumber == cn)
+        .OrderByDescending(p => p.Edition.DateReleased));
+    return _mapper.Map<IEnumerable<PrintModel>>(prints);
+  }
 }
