@@ -12,8 +12,10 @@ public class PrintRepository : EntityRepository<Print>, IPrintRepository
   protected override IQueryable<Print> Includer(IQueryable<Print> query) =>
     query
       .Include(p => p.Card)
-      .Include(p => p.Edition).ThenInclude(e => e.Type)
-      .Include(p => p.AvailableTreatments).ThenInclude(e => e.Treatment)
+      .Include(p => p.Edition)
+        .ThenInclude(e => e.Type)
+      .Include(p => p.AvailableTreatments.OrderBy(t => t.Treatment.Ordinal))
+        .ThenInclude(e => e.Treatment)
       .Include(p => p.DefaultLanguage)
       .Include(p => p.Rarity);
 
