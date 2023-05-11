@@ -39,7 +39,11 @@ public class PrintService : IPrintService
           (string.IsNullOrEmpty(model.CollectorNumber) ||
            c.CollectorNumber.ToLower() == model.CollectorNumber.ToLower())
         )
-        .Take(10)));
+        .OrderBy(p => p.Card.Name)
+        .ThenByDescending(p => p.Edition.DateReleased)
+        .ThenBy(p => p.CollectorNumber)
+        .Take(100)
+    ));
   }
 
   /// <inheritdoc />
