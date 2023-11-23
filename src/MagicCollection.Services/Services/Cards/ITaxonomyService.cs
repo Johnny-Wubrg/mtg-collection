@@ -1,6 +1,6 @@
 ﻿using MagicCollection.Services.Models.Interfaces;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <summary>
 /// Service to manage taxonomy

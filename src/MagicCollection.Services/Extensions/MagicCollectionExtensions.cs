@@ -2,7 +2,11 @@
 using MagicCollection.Data;
 using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Data.Repositories.Cards;
+using MagicCollection.Data.Repositories.Collection;
 using MagicCollection.Services.BulkData;
+using MagicCollection.Services.Cards;
+using MagicCollection.Services.Collection;
 using MagicCollection.Services.Models.Cards;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

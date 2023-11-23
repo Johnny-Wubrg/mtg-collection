@@ -1,6 +1,7 @@
 ﻿using MagicCollection.Data;
 using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Data.Repositories.Collection;
 using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Services.BulkData;

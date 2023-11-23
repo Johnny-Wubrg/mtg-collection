@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using MagicCollection.Data.Entities;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Data.Repositories.Collection;
 using MagicCollection.Services.Models.Collection;
 using MagicCollection.Services.Models.Request;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Collection;
 
 /// <inheritdoc />
 public class CardEntryService : ICardEntryService

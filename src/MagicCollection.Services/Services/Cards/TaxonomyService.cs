@@ -3,7 +3,7 @@ using MagicCollection.Data.Entities.Interfaces;
 using MagicCollection.Data.Repositories;
 using MagicCollection.Services.Models.Interfaces;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <inheritdoc />
 public class TaxonomyService<TEntity, TModel> : ITaxonomyService<TModel> where TEntity : class, ITaxonomy, new()

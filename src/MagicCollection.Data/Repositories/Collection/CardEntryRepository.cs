@@ -1,7 +1,7 @@
 ﻿using MagicCollection.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace MagicCollection.Data.Repositories;
+namespace MagicCollection.Data.Repositories.Collection;
 
 public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryRepository
 {

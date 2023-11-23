@@ -1,4 +1,5 @@
 ﻿using MagicCollection.Services;
+using MagicCollection.Services.Collection;
 using MagicCollection.Services.Models.Collection;
 using MagicCollection.Services.Models.Request;
 using Microsoft.AspNetCore.Mvc;

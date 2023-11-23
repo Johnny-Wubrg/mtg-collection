@@ -1,6 +1,6 @@
 ﻿using MagicCollection.Data.Entities;
 
-namespace MagicCollection.Data.Repositories;
+namespace MagicCollection.Data.Repositories.Collection;
 
 public interface ICardEntryRepository : IEntityRepository<CardEntry>
 {

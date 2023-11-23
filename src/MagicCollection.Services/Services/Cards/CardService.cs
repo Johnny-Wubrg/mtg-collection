@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Data.Repositories.Cards;
 using MagicCollection.Services.Models.Cards;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <inheritdoc />
 public class CardService : ICardService

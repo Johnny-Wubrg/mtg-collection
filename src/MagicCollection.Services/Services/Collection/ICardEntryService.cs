@@ -1,7 +1,7 @@
 ﻿using MagicCollection.Services.Models.Collection;
 using MagicCollection.Services.Models.Request;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Collection;
 
 /// <summary>
 /// Service to interact with collection entries

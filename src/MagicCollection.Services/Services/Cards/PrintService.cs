@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using MagicCollection.Data.Repositories;
+using MagicCollection.Data.Repositories.Cards;
 using MagicCollection.Services.Models.Cards;
 using MagicCollection.Services.Models.Request;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <inheritdoc />
 public class PrintService : IPrintService

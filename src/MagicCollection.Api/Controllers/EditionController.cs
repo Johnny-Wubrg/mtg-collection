@@ -1,4 +1,5 @@
 ﻿using MagicCollection.Services;
+using MagicCollection.Services.Cards;
 using MagicCollection.Services.Models.Cards;
 using Microsoft.AspNetCore.Mvc;
 

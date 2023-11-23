@@ -1,7 +1,7 @@
 ﻿using MagicCollection.Services.Models.Cards;
 using MagicCollection.Services.Models.Request;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <summary>
 /// Service to get card prints

@@ -1,6 +1,6 @@
 ﻿using MagicCollection.Services.Models.Cards;
 
-namespace MagicCollection.Services;
+namespace MagicCollection.Services.Cards;
 
 /// <summary>
 /// Service to interact with card data

@@ -1,8 +1,6 @@
-﻿using System.Linq.Expressions;
-using MagicCollection.Data.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using MagicCollection.Data.Entities;
 
-namespace MagicCollection.Data.Repositories;
+namespace MagicCollection.Data.Repositories.Cards;
 
 public class CardRepository : EntityRepository<Card>, ICardRepository
 {
