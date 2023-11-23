@@ -37,4 +37,6 @@ public class Print : IEntity
   public Uri ScryfallImageUri { get; set; }
 
   public DateTime DateUpdated { get; set; }
+  
+  public bool ScryfallDeleted { get; set; }
 }

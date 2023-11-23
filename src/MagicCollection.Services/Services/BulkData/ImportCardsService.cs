@@ -168,12 +168,18 @@ public class ImportCardsService : IImportCardsService
 
   private static void UpdatePrint(Print print, ScryfallCard card)
   {
+    print.DateUpdated = DateTime.UtcNow;
+
+    if (card is null)
+    {
+      print.ScryfallDeleted = true;
+      return;
+    }
+    
     foreach (var treatment in print.AvailableTreatments)
     {
       treatment.Usd = GetTreatmentPrice(card.Prices, treatment.TreatmentId);
     }
-
-    print.DateUpdated = DateTime.UtcNow;
   }
 
   private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
