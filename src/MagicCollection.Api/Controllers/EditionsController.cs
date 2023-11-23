@@ -1,7 +1,6 @@
 ﻿using MagicCollection.Services;
 using MagicCollection.Services.Cards;
 using MagicCollection.Services.Models.Cards;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MagicCollection.Api.Controllers;
 
@@ -10,7 +9,7 @@ namespace MagicCollection.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("[controller]")]
-public class EditionController : ControllerBase
+public class EditionsController : ControllerBase
 {
   private readonly IPrintService _printService;
 
@@ -18,7 +17,7 @@ public class EditionController : ControllerBase
   /// 
   /// </summary>
   /// <param name="printService"></param>
-  public EditionController(IPrintService printService)
+  public EditionsController(IPrintService printService)
   {
     _printService = printService;
   }

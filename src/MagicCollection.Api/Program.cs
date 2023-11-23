@@ -1,6 +1,8 @@
 using System.Reflection;
+using MagicCollection.Api.Formatters;
 using MagicCollection.Services.Extensions;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.OpenApi.Models;
 
@@ -22,7 +24,12 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(opt =>
+{
+  opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
+  opt.OutputFormatters.Add(new HttpNotFoundOutputFormatter());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

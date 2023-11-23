@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using MagicCollection.Services.BulkData;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic.FileIO;
 using ScryNet.Models;
 

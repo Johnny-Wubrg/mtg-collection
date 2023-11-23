@@ -1,8 +1,5 @@
-﻿using MagicCollection.Services;
-using MagicCollection.Services.Collection;
-using MagicCollection.Services.Models.Collection;
+﻿using MagicCollection.Services.Collection;
 using MagicCollection.Services.Models.Request;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MagicCollection.Api.Controllers;
 
@@ -11,6 +8,7 @@ namespace MagicCollection.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("card-entries")]
+[Tags("Card Entries")]
 public class CardEntriesController : ControllerBase
 {
   private readonly ICardEntryService _cardEntryService;

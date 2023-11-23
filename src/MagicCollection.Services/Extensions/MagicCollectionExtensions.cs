@@ -41,6 +41,8 @@ public static class MagicCollectionExtensions
     services.AddTransient<ICardEntryRepository, CardEntryRepository>();
     services.AddTransient<ISectionRepository, SectionRepository>();
     services.AddTransient<IPrintRepository, PrintRepository>();
+    services.AddTransient<IBinRepository, BinRepository>();
+    services.AddTransient<ISectionRepository, SectionRepository>();
   }
 
   private static void AddServices(IServiceCollection services, IConfiguration config)
@@ -54,6 +56,8 @@ public static class MagicCollectionExtensions
     services.AddTransient<ICardService, CardService>();
     services.AddTransient<ICardEntryService, CardEntryService>();
     services.AddTransient<IPrintService, PrintService>();
+    services.AddTransient<IBinService, BinService>();
+    services.AddTransient<ISectionService, SectionService>();
     services.AddScryNet(config);
   }
 

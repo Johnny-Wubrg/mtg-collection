@@ -24,5 +24,9 @@ public class CollectionProfile : Profile
       .ForMember(d => d.Print, opt => opt.Ignore())
       .ForMember(d => d.PrintId,
         opt => opt.MapFrom(s => s.Print.Id));
+    
+    CreateMap<Bin, BinModel>();
+    CreateMap<Section, SectionModel>();
+
   }
 }

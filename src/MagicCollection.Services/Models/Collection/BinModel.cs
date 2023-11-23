@@ -22,11 +22,6 @@ public class BinModel
   public string Label { get; set; }
 
   /// <summary>
-  /// The subdivisions of the storage location
-  /// </summary>
-  public ICollection<SectionModel> Sections { get; set; }
-
-  /// <summary>
   /// The order value of the storage location
   /// </summary>
   /// <example>1</example>
