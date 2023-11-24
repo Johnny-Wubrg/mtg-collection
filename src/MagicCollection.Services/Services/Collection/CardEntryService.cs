@@ -30,13 +30,18 @@ public class CardEntryService : ICardEntryService
   public async Task<PagedResponseModel<CardEntryModel>> GetPaged(int page = 1, int pageSize = 50)
   {
     var skip = (page - 1) * pageSize;
-    var items = await _repo.GetAll(e => e.Skip(skip).Take(pageSize));
+    var items = await _repo.GetAll(e => e
+      .OrderBy(c => c.Print.Card.Name)
+      .ThenBy(c => c.Print.Edition.DateReleased)
+      .Skip(skip)
+      .Take(pageSize));
     var count = await _repo.Count();
 
     return new PagedResponseModel<CardEntryModel>
     {
       Data = _mapper.Map<IEnumerable<CardEntryModel>>(items),
       Page = page,
+      PageSize = pageSize,
       TotalElements = count
     };
   }

@@ -15,9 +15,14 @@ public record PagedResponseModel<T>
   /// The current page number
   /// </summary>
   public int Page { get; set; }
+  
+  /// <summary>
+  /// The current page size
+  /// </summary>
+  public int PageSize { get; set; }
 
   /// <summary>
-  /// The current number of elements per page
+  /// The number of elements in the current page
   /// </summary>
   public int PageElements => Data.Count();
   
@@ -29,5 +34,5 @@ public record PagedResponseModel<T>
   /// <summary>
   /// The total count of pages
   /// </summary>
-  public int TotalPages => (int)Math.Ceiling((decimal)TotalElements / PageElements);
+  public int TotalPages => (int)Math.Ceiling((decimal)TotalElements / PageSize);
 }
