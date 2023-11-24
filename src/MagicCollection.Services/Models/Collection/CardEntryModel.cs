@@ -35,10 +35,4 @@ public class CardEntryModel
   /// </summary>
   [Required]
   public LanguageModel Language { get; set; }
-
-  /// <summary>
-  /// The subdivision this card is stored in
-  /// </summary>
-  [Required]
-  public SectionModel Section { get; set; }
 }

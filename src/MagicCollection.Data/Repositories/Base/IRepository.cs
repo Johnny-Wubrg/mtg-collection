@@ -13,4 +13,5 @@ public interface IRepository<T> where T : class, new()
   public Task SaveChanges();
 
   public Task<T> Find(Expression<Func<T, bool>> predicate);
+  public Task<int> Count(Func<IQueryable<T>, IQueryable<T>> transform = null);
 }

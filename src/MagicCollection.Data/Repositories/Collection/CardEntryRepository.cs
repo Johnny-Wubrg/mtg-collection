@@ -41,4 +41,16 @@ public class CardEntryRepository : EntityRepository<CardEntry>, ICardEntryReposi
 
     await Context.CardEntries.AddAsync(entry, cancellationToken);
   }
+
+  protected override IQueryable<CardEntry> Includer(IQueryable<CardEntry> query)
+  {
+    return query
+      .Include(e => e.Print.Card)
+      .Include(e => e.Print.Edition).ThenInclude(e => e.Type)
+      .Include(e => e.Print.Rarity)
+      .Include(e => e.Print.DefaultLanguage)
+      .Include(e => e.Treatment)
+      .Include(e => e.Language)
+      .Include(e => e.Section);
+  }
 }

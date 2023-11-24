@@ -12,9 +12,6 @@ public class CollectionProfile : Profile
   {
     CreateMap<CardEntry, CardEntryModel>();
     CreateMap<CardEntryModel, CardEntry>()
-      .ForMember(d => d.Section, opt => opt.Ignore())
-      .ForMember(d => d.SectionId, 
-        opt => opt.MapFrom(s => s.Section.Id))
       .ForMember(d => d.Language, opt => opt.Ignore())
       .ForMember(d => d.LanguageIdentifier, 
         opt => opt.MapFrom(s => s.Language.Identifier))

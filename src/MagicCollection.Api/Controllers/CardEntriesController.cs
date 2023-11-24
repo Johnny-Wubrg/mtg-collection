@@ -1,5 +1,7 @@
 ﻿using MagicCollection.Services.Collection;
+using MagicCollection.Services.Models.Collection;
 using MagicCollection.Services.Models.Request;
+using MagicCollection.Services.Models.Response;
 
 namespace MagicCollection.Api.Controllers;
 
@@ -21,6 +23,14 @@ public class CardEntriesController : ControllerBase
   {
     _cardEntryService = cardEntryService;
   }
+
+  /// <summary>
+  /// Get entries
+  /// </summary>
+  /// <param name="page"></param>
+  /// <returns></returns>
+  [HttpGet]
+  public Task<PagedResponseModel<CardEntryModel>> Get(int page = 1) => _cardEntryService.GetPaged(page);
 
   /// <summary>
   /// Adds a quantity of cards to an entry to a collection

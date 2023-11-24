@@ -15,19 +15,19 @@ public record PagedResponseModel<T>
   /// The current page number
   /// </summary>
   public int Page { get; set; }
-  
+
   /// <summary>
   /// The current number of elements per page
   /// </summary>
-  public int PageSize { get; set; }
+  public int PageElements => Data.Count();
   
   /// <summary>
   /// The total count of all elements
   /// </summary>
   public int TotalElements { get; set; }
-  
+
   /// <summary>
   /// The total count of pages
   /// </summary>
-  public int TotalPages { get; set; }
+  public int TotalPages => (int)Math.Ceiling((decimal)TotalElements / PageElements);
 }

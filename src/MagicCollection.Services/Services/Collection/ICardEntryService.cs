@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Services.Models.Collection;
 using MagicCollection.Services.Models.Request;
+using MagicCollection.Services.Models.Response;
 
 namespace MagicCollection.Services.Collection;
 
@@ -23,4 +24,7 @@ public interface ICardEntryService
   /// <param name="cancellationToken"></param>
   /// <returns></returns>
   Task AddRange(IEnumerable<CardEntryRequestModel> models, CancellationToken cancellationToken = default);
+
+  /// <inheritdoc />
+  Task<PagedResponseModel<CardEntryModel>> GetPaged(int page = 1, int pageSize = 50);
 }
