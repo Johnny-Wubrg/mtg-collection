@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildThisFileName).xml</DocumentationFile>
+        <LangVersion>13</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\..\..\dotnet-core\ScryNet\ScryNet\ScryNet.csproj" />
+      <ProjectReference Include="..\..\..\..\..\dotnet\ScryNet\ScryNet.csproj" />
       <ProjectReference Include="..\MagicCollection.Data\MagicCollection.Data.csproj" />
     </ItemGroup>
 

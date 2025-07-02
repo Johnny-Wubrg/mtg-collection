@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildThisFileName).xml</DocumentationFile>
+    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\dotnet-core\ScryNet\ScryNet\ScryNet.csproj" />
+    <ProjectReference Include="..\..\..\..\..\dotnet\ScryNet\ScryNet.csproj" />
     <ProjectReference Include="..\MagicCollection.Services\MagicCollection.Services.csproj" />
   </ItemGroup>
 
