@@ -3,7 +3,7 @@ using MagicCollection.Services.BulkData;
 using Microsoft.VisualBasic.FileIO;
 using ScryNet.Models;
 
-namespace MagicTutors.Api.Controllers;
+namespace MagicCollection.Api.Controllers;
 
 /// <inheritdoc />
 [ApiController]
