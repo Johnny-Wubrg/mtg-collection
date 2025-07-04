@@ -1,5 +1,6 @@
 ﻿using MagicCollection.Data;
 using MagicCollection.Data.Entities;
+using MagicCollection.Data.Entities.Interfaces;
 using MagicCollection.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using ScryNet.Models;
@@ -26,123 +27,117 @@ public class ImportCardsService : IImportCardsService
   public async Task UploadCards(IEnumerable<ScryfallCard> cards,
     CancellationToken cancellationToken)
   {
-    Guid[] savedCardIds;
-    Guid[] savedEditionIds;
-    Guid[] savedPrintIds;
+    await using var context = new MagicCollectionContext(_contextOptions);
 
-    await using (var context = new MagicCollectionContext(_contextOptions))
-    {
-      savedCardIds = await context.Cards.Select(e => e.Id).ToArrayAsync(cancellationToken);
-      savedEditionIds = await context.Editions.Select(e => e.Id).ToArrayAsync(cancellationToken);
-      savedPrintIds = await context.Prints.Select(e => e.Id).ToArrayAsync(cancellationToken);
-    }
+    var savedCardIds = await context.Cards.Select(e => e.Id).ToArrayAsync(cancellationToken);
+    var savedEditionIds = await context.Editions.Select(e => e.Id).ToArrayAsync(cancellationToken);
+    var savedPrintIds = await context.Prints.Select(e => e.Id).ToArrayAsync(cancellationToken);
 
     var scryfallCards = cards as ScryfallCard[] ?? cards.ToArray();
 
-    var cardUploadTasks = scryfallCards
+    var languages = await PreloadTaxonomy<Language>(
+      context,
+      scryfallCards.Select(c => c.Lang),
+      cancellationToken);
+
+    var rarities = await PreloadTaxonomy<Rarity>(
+      context,
+      scryfallCards.Select(c => c.Rarity),
+      cancellationToken);
+
+    var treatments = await PreloadTaxonomy<Treatment>(
+      context,
+      scryfallCards.SelectMany(c => c.Finishes),
+      cancellationToken);
+
+    var editionTypes = await PreloadTaxonomy<EditionType>(
+      context,
+      scryfallCards.Select(c => c.SetType),
+      cancellationToken);
+
+    await context.SaveChangesAsync(cancellationToken);
+
+    var cardsToAdd = scryfallCards
       .DistinctBy(e => e.OracleId)
       .Where(e => !savedCardIds.Contains(e.OracleId))
-      .Select(c => CreateCard(c, cancellationToken));
+      .Select(CreateCard);
 
-    var editionUploadTasks = scryfallCards
+    var editionsToAdd = scryfallCards
       .DistinctBy(e => e.SetId)
       .Where(e => !savedEditionIds.Contains(e.SetId))
-      .Select(c => CreateEdition(c, cancellationToken));
+      .Select(c => CreateEdition(c, editionTypes));
 
-    await Task.WhenAll(cardUploadTasks.Concat(editionUploadTasks));
-
-    var printUploadTasks = scryfallCards
+    var printsToAdd = scryfallCards
       .Where(e => !savedPrintIds.Contains(e.Id))
-      .Select(c => CreatePrint(c, cancellationToken));
+      .Select(c => CreatePrint(c, languages, rarities, treatments));
 
+    await Task.WhenAll([
+      context.Cards.AddRangeAsync(cardsToAdd, cancellationToken),
+      context.Editions.AddRangeAsync(editionsToAdd, cancellationToken),
+      context.Prints.AddRangeAsync(printsToAdd, cancellationToken)
+    ]);
 
-    await Task.WhenAll(printUploadTasks);
+    await context.SaveChangesAsync(cancellationToken);
 
     await UpdatePrints(savedPrintIds, scryfallCards, cancellationToken);
   }
 
-  private async Task CreateCard(ScryfallCard card, CancellationToken cancellationToken)
+
+  private Card CreateCard(ScryfallCard card)
   {
-    cancellationToken.ThrowIfCancellationRequested();
-
-    await using var context = new MagicCollectionContext(_contextOptions);
-
-    try
+    return new Card
     {
-      var cardRecord = new Card
-      {
-        Id = card.OracleId,
-        Name = card.Name
-      };
-
-      await context.Cards.AddAsync(cardRecord, cancellationToken);
-      await context.SaveChangesAsync(cancellationToken);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine(ex.Message);
-    }
+      Id = card.OracleId,
+      Name = card.Name
+    };
   }
 
-  private async Task CreateEdition(ScryfallCard card, CancellationToken cancellationToken)
+  private Edition CreateEdition(ScryfallCard card,
+    List<EditionType> editionTypes)
   {
-    cancellationToken.ThrowIfCancellationRequested();
-
-    await using var context = new MagicCollectionContext(_contextOptions);
-    var editionTypeRepo = new TaxonomyRepository<EditionType>(context);
-
-    try
+    return new Edition
     {
-      var cardRecord = new Edition
-      {
-        Id = card.SetId,
-        Code = card.Set,
-        Name = card.SetName,
-        Type = await editionTypeRepo.GetOrCreate(card.SetType, cancellationToken),
-        DateReleased = DateOnly.FromDateTime(card.ReleasedAt)
-      };
-
-      await context.Editions.AddAsync(cardRecord, cancellationToken);
-      await context.SaveChangesAsync(cancellationToken);
-    }
-    catch (Exception ex)
-    {
-      Console.WriteLine(ex.Message);
-    }
+      Id = card.SetId,
+      Code = card.Set,
+      Name = card.SetName,
+      Type = editionTypes.FirstOrDefault(t => t.Identifier == card.SetType),
+      DateReleased = DateOnly.FromDateTime(card.ReleasedAt)
+    };
   }
 
-  private async Task CreatePrint(ScryfallCard card, CancellationToken cancellationToken)
+  private async Task<List<TTaxonomy>> PreloadTaxonomy<TTaxonomy>(
+    MagicCollectionContext context,
+    IEnumerable<string> names,
+    CancellationToken cancellationToken)
+    where TTaxonomy : class, ITaxonomy, new()
   {
-    cancellationToken.ThrowIfCancellationRequested();
+    var repo = new TaxonomyRepository<TTaxonomy>(context);
+    var result = (await repo.GetAll(tracked: true)).ToList();
 
-    await using var context = new MagicCollectionContext(_contextOptions);
-    var treatmentRepo = new TaxonomyRepository<Treatment>(context);
-    var rarityRepo = new TaxonomyRepository<Rarity>(context);
-    var languageRepo = new TaxonomyRepository<Language>(context);
-
-    try
+    foreach (var name in names.Distinct().Where(e => result.All(t => t.Identifier != e)))
     {
-      var cardRecord = new Print
-      {
-        Id = card.Id,
-        CardId = card.OracleId != Guid.Empty ? card.OracleId : card.CardFaces[0].OracleId,
-        EditionId = card.SetId,
-        CollectorNumber = card.CollectorNumber,
-        DateUpdated = DateTime.UtcNow,
-        DefaultLanguage = await languageRepo.GetOrCreate(card.Lang, cancellationToken),
-        ScryfallImageUri = GetImageUri(card),
-        ScryfallUri = card.ScryfallUri,
-        Rarity = await rarityRepo.GetOrCreate(card.Rarity, cancellationToken),
-        AvailableTreatments = await GetAvailableTreatments(treatmentRepo, card.Finishes, card.Prices, cancellationToken)
-      };
+      result.Add(await repo.GetOrCreate(name, cancellationToken));
+    }
 
-      await context.Prints.AddAsync(cardRecord, cancellationToken);
-      await context.SaveChangesAsync(cancellationToken);
-    }
-    catch (Exception ex)
+    return result;
+  }
+
+  private Print CreatePrint(ScryfallCard card, List<Language> languages, List<Rarity> rarities,
+    List<Treatment> treatments)
+  {
+    return new Print
     {
-      Console.WriteLine(ex.Message);
-    }
+      Id = card.Id,
+      CardId = card.OracleId != Guid.Empty ? card.OracleId : card.CardFaces[0].OracleId,
+      EditionId = card.SetId,
+      CollectorNumber = card.CollectorNumber,
+      DateUpdated = DateTime.UtcNow,
+      DefaultLanguage = languages.FirstOrDefault(l => l.Identifier == card.Lang),
+      ScryfallImageUri = GetImageUri(card),
+      ScryfallUri = card.ScryfallUri,
+      Rarity = rarities.FirstOrDefault(r => r.Identifier == card.Rarity),
+      AvailableTreatments = GetAvailableTreatments(treatments, card.Finishes, card.Prices)
+    };
   }
 
 
@@ -152,17 +147,17 @@ public class ImportCardsService : IImportCardsService
     cancellationToken.ThrowIfCancellationRequested();
 
     await using var context = new MagicCollectionContext(_contextOptions);
-    
+
     var printsToUpdate = context.Prints
       .Include(e => e.AvailableTreatments)
       .Where(e => savedPrintIds.Contains(e.Id));
-    
+
     foreach (var print in printsToUpdate)
     {
       var card = scryfallCards.FirstOrDefault(e => e.Id == print.Id);
       UpdatePrint(print, card);
     }
-      
+
     await context.SaveChangesAsync(cancellationToken);
   }
 
@@ -175,30 +170,29 @@ public class ImportCardsService : IImportCardsService
       print.ScryfallDeleted = true;
       return;
     }
-    
+
     foreach (var treatment in print.AvailableTreatments)
     {
       treatment.Usd = GetTreatmentPrice(card.Prices, treatment.TreatmentId);
     }
   }
 
-  private async Task<ICollection<PrintTreatment>> GetAvailableTreatments(
-    ITaxonomyRepository<Treatment> treatmentRepository, IEnumerable<string> finishes, Prices cardPrices,
-    CancellationToken cancellationToken = default)
+  private ICollection<PrintTreatment> GetAvailableTreatments(
+    IEnumerable<Treatment> treatments, IEnumerable<string> finishes, Prices cardPrices)
   {
-    var treatments = new List<PrintTreatment>();
+    var result = new List<PrintTreatment>();
 
     foreach (var f in finishes)
     {
-      var treatment = await treatmentRepository.GetOrCreate(f, cancellationToken);
-      treatments.Add(new PrintTreatment
+      var treatment = treatments.FirstOrDefault(t => t.Identifier == f);
+      result.Add(new PrintTreatment
       {
         Treatment = treatment,
         Usd = GetTreatmentPrice(cardPrices, f)
       });
     }
 
-    return treatments;
+    return result;
   }
 
   private static decimal? GetTreatmentPrice(Prices cardPrices, string treatment)

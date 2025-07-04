@@ -11,7 +11,6 @@ using MagicCollection.Services.Models.Cards;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ScryNet.Extensions;
 
 namespace MagicCollection.Services.Extensions;
 
@@ -58,7 +57,7 @@ public static class MagicCollectionExtensions
     services.AddTransient<IPrintService, PrintService>();
     services.AddTransient<IBinService, BinService>();
     services.AddTransient<ISectionService, SectionService>();
-    services.AddScryNet(config);
+    // services.AddScryNet(config);
   }
 
   private static void AddDatabase(IServiceCollection services, IConfiguration config) =>

@@ -33,9 +33,9 @@ public abstract class Repository<T> : IRepository<T> where T : class, new()
     return await query.CountAsync();
   }
 
-  public async Task SaveChanges()
+  public async Task SaveChanges(CancellationToken cancellationToken = default)
   {
-    await Context.SaveChangesAsync();
+    await Context.SaveChangesAsync(cancellationToken);
   }
 
   protected virtual IQueryable<T> Includer(IQueryable<T> query) => query;

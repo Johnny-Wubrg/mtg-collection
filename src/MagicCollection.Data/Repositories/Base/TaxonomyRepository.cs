@@ -1,15 +1,17 @@
-﻿using MagicCollection.Data.Entities.Interfaces;
+﻿using System.Collections.Concurrent;
+using MagicCollection.Data.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace MagicCollection.Data.Repositories;
 
 public class TaxonomyRepository<T> : Repository<T>, ITaxonomyRepository<T> where T : class, ITaxonomy, new()
 {
+  private readonly ConcurrentDictionary<string, SemaphoreSlim> _taxonomyLocks = new();
   public TaxonomyRepository(MagicCollectionContext context) : base(context)
   {
   }
 
-  public async Task<T> GetOrCreate(string id, CancellationToken cancellationToken = default)
+  private async Task<T> UnsafeGetOrCreate(string id, CancellationToken cancellationToken = default)
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
 
@@ -26,6 +28,22 @@ public class TaxonomyRepository<T> : Repository<T>, ITaxonomyRepository<T> where
     await Context.Set<T>().AddAsync(newRecord, cancellationToken);
 
     return newRecord;
+  }
+  
+  public async Task<T> GetOrCreate(string name, CancellationToken token)
+  {
+    var sem = _taxonomyLocks.GetOrAdd(name, _ => new SemaphoreSlim(1, 1));
+    await sem.WaitAsync(token);
+    try
+    {
+      var result = await UnsafeGetOrCreate(name, token);
+      await SaveChanges(token);
+      return result;
+    }
+    finally
+    {
+      sem.Release();
+    }
   }
 
   protected override IQueryable<T> DefaultTransform(IQueryable<T> query) =>
