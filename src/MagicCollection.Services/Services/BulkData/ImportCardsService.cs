@@ -175,6 +175,9 @@ public class ImportCardsService : IImportCardsService
     {
       treatment.Usd = GetTreatmentPrice(card.Prices, treatment.TreatmentId);
     }
+    
+    print.EditionId = card.SetId;
+    print.CollectorNumber = card.CollectorNumber;
   }
 
   private ICollection<PrintTreatment> GetAvailableTreatments(
