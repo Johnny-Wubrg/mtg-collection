@@ -19,4 +19,5 @@ public class SectionRepository : EntityRepository<Section>, ISectionRepository
 
     return newRecord;
   }
+  protected override IQueryable<Section> DefaultTransform(IQueryable<Section> query) => query.OrderBy(e => e.Ordinal);
 }

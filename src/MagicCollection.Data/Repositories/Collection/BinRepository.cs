@@ -20,8 +20,10 @@ public class BinRepository : EntityRepository<Bin>, IBinRepository
     return newRecord;
   }
 
+  protected override IQueryable<Bin> DefaultTransform(IQueryable<Bin> query) => query.OrderBy(e => e.Ordinal);
+
   protected override IQueryable<Bin> Includer(IQueryable<Bin> query)
   {
-    return query.Include(e => e.Sections);
+    return query.Include(e => e.Sections.OrderBy(s => s.Ordinal));
   }
 }

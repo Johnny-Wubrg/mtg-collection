@@ -20,10 +20,10 @@ public class BinModel
   /// <example>Big Bin</example>
   [Required]
   public string Label { get; set; }
-
+  
+  
   /// <summary>
-  /// The order value of the storage location
+  /// Sections within the storage location
   /// </summary>
-  /// <example>1</example>
-  public int Ordinal { get; set; }
+  public IEnumerable<SectionModel> Sections { get; set; }
 }

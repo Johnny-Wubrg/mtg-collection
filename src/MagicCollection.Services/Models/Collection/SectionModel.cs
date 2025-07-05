@@ -19,10 +19,4 @@ public class SectionModel
   /// <example>Artifacts in the Big Bin</example>
   [Required]
   public string Label { get; set; }
-  
-  /// <summary>
-  /// The order value of the subdivision
-  /// </summary>
-  /// <example>1</example>
-  public int Ordinal { get; set; }
 }
